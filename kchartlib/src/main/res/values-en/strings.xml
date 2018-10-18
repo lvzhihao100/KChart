@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="kchart_date">Date</string>
+	<string name="kchart_time">Time</string>
+	<string name="kchart_high">High</string>
+	<string name="kchart_low">Low</string>
+	<string name="kchart_open">Open</string>
+	<string name="kchart_close">Close</string>
+
+</resources>
