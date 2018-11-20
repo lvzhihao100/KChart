@@ -72,8 +72,17 @@ public class KChartView extends BaseKChartView {
         addChildDraw("MACD", mMACDDraw);
         addChildDraw("KDJ", mKDJDraw);
         addChildDraw("RSI", mRSIDraw);
-        addChildDraw("BOLL", mBOLLDraw);
+//        addChildDraw("BOLL", mBOLLDraw);
         setMainDraw(mMainDraw);
+    }
+    public void setMainDrawMaShow(){
+        mMainDraw.setShowMa();
+    }
+    public void setMainDrawBollShow(){
+        mMainDraw.setShowBoll();
+    }
+    public void setMainDrawNoneShow(){
+        mMainDraw.setShowNone();
     }
 
     private void initAttrs(AttributeSet attrs) {
@@ -271,6 +280,7 @@ public class KChartView extends BaseKChartView {
      */
     public void setUpColor(int color) {
         mBOLLDraw.setUpColor(color);
+        mMainDraw.setBollUpColor(color);
     }
 
     /**
@@ -315,6 +325,7 @@ public class KChartView extends BaseKChartView {
      */
     public void setMbColor(int color) {
         mBOLLDraw.setMbColor(color);
+        mMainDraw.setBollMbColor(color);
     }
 
     /**
@@ -322,6 +333,8 @@ public class KChartView extends BaseKChartView {
      */
     public void setDnColor(int color) {
         mBOLLDraw.setDnColor(color);
+        mMainDraw.setBollDnColor(color);
+
     }
 
     /**

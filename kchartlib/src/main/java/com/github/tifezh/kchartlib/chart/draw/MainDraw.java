@@ -13,6 +13,7 @@ import com.github.tifezh.kchartlib.R;
 import com.github.tifezh.kchartlib.chart.BaseKChartView;
 import com.github.tifezh.kchartlib.chart.base.IChartDraw;
 import com.github.tifezh.kchartlib.chart.base.IValueFormatter;
+import com.github.tifezh.kchartlib.chart.entity.IBOLL;
 import com.github.tifezh.kchartlib.chart.entity.ICandle;
 import com.github.tifezh.kchartlib.chart.entity.IKLine;
 import com.github.tifezh.kchartlib.chart.formatter.DateFormatter;
@@ -32,8 +33,8 @@ public class MainDraw implements IChartDraw<ICandle> {
 
     private float mCandleWidth = 0;
     private float mCandleLineWidth = 0;
-    private int startPadding=10;
-    private int spacePadding=10;
+    private int startPadding = 10;
+    private int spacePadding = 10;
     private Paint mBluePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mRedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -43,6 +44,10 @@ public class MainDraw implements IChartDraw<ICandle> {
     private Paint ma10Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint ma20Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
+    private Paint mUpPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mMbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mDnPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
     private Paint mSelectorTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mSelectorBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mSelectorBackgroundStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -51,6 +56,7 @@ public class MainDraw implements IChartDraw<ICandle> {
     private boolean mCandleSolid = true;
     private BaseKChartView view;
     private final Context context;
+    private int type = 1;//0 没有线,1 MA,2 Boll
 
     public MainDraw(BaseKChartView view) {
         this.view = view;
@@ -67,6 +73,15 @@ public class MainDraw implements IChartDraw<ICandle> {
         mSelectorBackgroundStrokePaint.setStyle(Paint.Style.STROKE);
         mSelectorBackgroundStrokePaint.setStrokeWidth(view.dp2px(1));
     }
+    public void setShowMa(){
+        type=1;
+    }
+    public void setShowBoll(){
+        type=2;
+    }
+    public void setShowNone(){
+        type=0;
+    }
 
     public void setUpColor(@ColorRes int color) {
         mRedPaint.setColor(ContextCompat.getColor(context, color));
@@ -82,17 +97,36 @@ public class MainDraw implements IChartDraw<ICandle> {
             view.drawMainLine(canvas, mLinePaint, lastX, lastPoint.getClosePrice(), curX, curPoint.getClosePrice());
         } else { //绘制蜡烛图
             drawCandle(view, canvas, curX, curPoint.getHighPrice(), curPoint.getLowPrice(), curPoint.getOpenPrice(), curPoint.getClosePrice());
-            //画ma5
-            if (lastPoint.getMA5Price() != 0) {
-                view.drawMainLine(canvas, ma5Paint, lastX, lastPoint.getMA5Price(), curX, curPoint.getMA5Price());
-            }
-            //画ma10
-            if (lastPoint.getMA10Price() != 0) {
-                view.drawMainLine(canvas, ma10Paint, lastX, lastPoint.getMA10Price(), curX, curPoint.getMA10Price());
-            }
-            //画ma20
-            if (lastPoint.getMA20Price() != 0) {
-                view.drawMainLine(canvas, ma20Paint, lastX, lastPoint.getMA20Price(), curX, curPoint.getMA20Price());
+            if (type == 1) {
+                //画ma5
+                if (lastPoint.getMA5Price() != 0) {
+                    view.drawMainLine(canvas, ma5Paint, lastX, lastPoint.getMA5Price(), curX, curPoint.getMA5Price());
+                }
+                //画ma10
+                if (lastPoint.getMA10Price() != 0) {
+                    view.drawMainLine(canvas, ma10Paint, lastX, lastPoint.getMA10Price(), curX, curPoint.getMA10Price());
+                }
+                //画ma20
+                if (lastPoint.getMA20Price() != 0) {
+                    view.drawMainLine(canvas, ma20Paint, lastX, lastPoint.getMA20Price(), curX, curPoint.getMA20Price());
+                }
+                //画Boll
+                if (lastPoint.getMA20Price() != 0) {
+                    view.drawMainLine(canvas, ma20Paint, lastX, lastPoint.getMA20Price(), curX, curPoint.getMA20Price());
+                }
+            } else if (type == 2) {
+                //画mb
+                if (lastPoint.getMb() != 0) {
+                    view.drawMainLine(canvas, mMbPaint, lastX, lastPoint.getMb(), curX, curPoint.getMb());
+                }
+                //画ub
+                if (lastPoint.getUp() != 0) {
+                    view.drawMainLine(canvas, mUpPaint, lastX, lastPoint.getUp(), curX, curPoint.getUp());
+                }
+                //画db
+                if (lastPoint.getDn() != 0) {
+                    view.drawMainLine(canvas, mDnPaint, lastX, lastPoint.getDn(), curX, curPoint.getDn());
+                }
             }
         }
 
@@ -100,20 +134,34 @@ public class MainDraw implements IChartDraw<ICandle> {
 
     @Override
     public void drawText(@NonNull Canvas canvas, @NonNull BaseKChartView view, int position, float x, float y) {
-        ICandle point = (IKLine) view.getItem(position);
-        String text = "MA5:" + view.formatValue(point.getMA5Price()) + " ";
-        x+=startPadding;
-        canvas.drawText(text, x, y, ma5Paint);
-        x += ma5Paint.measureText(text)+spacePadding;
-        text = "MA10:" + view.formatValue(point.getMA10Price()) + " ";
-        canvas.drawText(text, x, y, ma10Paint);
-        x += ma10Paint.measureText(text)+spacePadding;
-        text = "MA20:" + view.formatValue(point.getMA20Price()) + " ";
-        canvas.drawText(text, x, y, ma20Paint);
+        if (type == 1) {
+            ICandle point = (IKLine) view.getItem(position);
+            String text = "MA5:" + view.formatValue(point.getMA5Price()) + " ";
+            x += startPadding;
+            canvas.drawText(text, x, y, ma5Paint);
+            x += ma5Paint.measureText(text) + spacePadding;
+            text = "MA10:" + view.formatValue(point.getMA10Price()) + " ";
+            canvas.drawText(text, x, y, ma10Paint);
+            x += ma10Paint.measureText(text) + spacePadding;
+            text = "MA20:" + view.formatValue(point.getMA20Price()) + " ";
+            canvas.drawText(text, x, y, ma20Paint);
+        } else if (type == 2) {
+            IBOLL point = (IBOLL) view.getItem(position);
+            String text = "BOLL:" + view.formatValue(point.getMb()) + " ";
+            x += startPadding;
+            canvas.drawText(text, x, y, ma5Paint);
+            x += ma5Paint.measureText(text) + spacePadding;
+            text = "UB:" + view.formatValue(point.getUp()) + " ";
+            canvas.drawText(text, x, y, ma10Paint);
+            x += ma10Paint.measureText(text) + spacePadding;
+            text = "LB:" + view.formatValue(point.getDn()) + " ";
+            canvas.drawText(text, x, y, ma20Paint);
+        }
         if (view.isLongPress() && !view.isDrawMinuteStyle()) {
             drawSelector(view, canvas);
         }
     }
+
     @Override
     public float getMaxValue(ICandle point) {
         if (view.isDrawMinuteStyle()) {
@@ -353,5 +401,26 @@ public class MainDraw implements IChartDraw<ICandle> {
 
     public void setMaSpacePadding(int spacePadding) {
         this.spacePadding = spacePadding;
+    }
+    /**
+     * 设置up颜色
+     */
+    public void setBollUpColor(int color) {
+        mUpPaint.setColor(color);
+    }
+
+    /**
+     * 设置mb颜色
+     * @param color
+     */
+    public void setBollMbColor(int color) {
+        mMbPaint.setColor(color);
+    }
+
+    /**
+     * 设置dn颜色
+     */
+    public void setBollDnColor(int color) {
+        mDnPaint.setColor(color);
     }
 }

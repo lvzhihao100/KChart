@@ -55,4 +55,19 @@ public class SimpleCandle implements ICandle {
     public long getDatetime() {
         return 0;
     }
+
+    @Override
+    public float getUp() {
+        return 0;
+    }
+
+    @Override
+    public float getMb() {
+        return 0;
+    }
+
+    @Override
+    public float getDn() {
+        return 0;
+    }
 }

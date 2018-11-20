@@ -280,8 +280,8 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      * @param colorTop
      * @param colorEnd
      */
-    public void setShader(int colorTop, int colorEnd) {
-        Shader mShader = new LinearGradient(0, 0, 0, 1000, new int[]{colorTop, colorEnd}, null, Shader.TileMode.REPEAT);
+    public void setShader(int colorTop, int colorEnd,int endY) {
+        Shader mShader = new LinearGradient(0, 0, 0, endY, new int[]{colorTop, colorEnd}, null, Shader.TileMode.REPEAT);
         mShaderPaint.setShader(mShader);
     }
 
@@ -1027,9 +1027,9 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         } else {
             floats[0] = mMinValue - Math.abs(mMaxValue - mMinValue) * 0.1f;
             floats[1] = mMaxValue + Math.abs(mMaxValue - mMinValue) * 0.1f;
-            if (floats[0] < 0) {
-                floats[0] = 0;
-            }
+//            if (floats[0] < 0) {
+//                floats[0] = 0;
+//            }
         }
         return floats;
     }

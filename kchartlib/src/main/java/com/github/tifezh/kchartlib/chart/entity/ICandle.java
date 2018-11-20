@@ -5,7 +5,7 @@ package com.github.tifezh.kchartlib.chart.entity;
  * Created by tifezh on 2016/6/9.
  */
 
-public interface ICandle {
+public interface ICandle extends IBOLL{
 
     /**
      * 开盘价
