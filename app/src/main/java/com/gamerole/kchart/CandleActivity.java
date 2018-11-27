@@ -3,6 +3,7 @@ package com.gamerole.kchart;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import com.github.tifezh.kchartlib.chart.BaseKChartAdapter;
@@ -43,6 +44,7 @@ public class CandleActivity extends AppCompatActivity {
         mMinuteKchartview.setMainDrawBollShow();
         mMinuteKchartview.setDrawMinuteStyle(false);
         mMinuteKchartview.setDateTimeFormatter(new TimeFormatter());
+        mMinuteKchartview.setTabBackGroundColor(ContextCompat.getColor(this,R.color.chart_red));
         mAdapter = new KChartAdapter();
         mMinuteKchartview.setAdapter(mAdapter);
         InputStream input = null;

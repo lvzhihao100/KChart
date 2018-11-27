@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -31,26 +32,38 @@ public class KChartTabView extends RelativeLayout implements View.OnClickListene
     private int mSelectedIndex = 0;
     private ColorStateList mColorStateList;
     private int mIndicatorColor;
+    private Context context;
+    private View view;
+    private int tabColor = 0;
 
     public KChartTabView(Context context) {
         super(context);
+        this.context = context;
         init();
     }
 
     public KChartTabView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
+
         init();
     }
 
     public KChartTabView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.context = context;
+
         init();
     }
 
     private void init() {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.layout_chart_tab, null, false);
+        view = LayoutInflater.from(getContext()).inflate(R.layout.layout_chart_tab, null, false);
         LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewUtil.Dp2Px(getContext(), 30));
         view.setLayoutParams(layoutParams);
+        if (tabColor != 0) {
+            view.setBackgroundColor(tabColor);
+        }
+
         addView(view);
         mLlContainer = (LinearLayout) findViewById(R.id.ll_container);
         mTvFullScreen = (TextView) findViewById(R.id.tv_fullScreen);
@@ -68,10 +81,17 @@ public class KChartTabView extends RelativeLayout implements View.OnClickListene
             }
         });
         mTvFullScreen.setSelected(true);
-        if(mColorStateList!=null)
-        {
+        if (mColorStateList != null) {
             mTvFullScreen.setTextColor(mColorStateList);
         }
+    }
+
+    public void setTabBackgroundColor(int color) {
+        if (view != null) {
+            view.setBackgroundColor(color);
+        }
+        tabColor = color;
+
     }
 
     @Override
@@ -105,7 +125,7 @@ public class KChartTabView extends RelativeLayout implements View.OnClickListene
      * @param text 选项卡文字
      */
     public void addTab(String text) {
-        TabView tabView=new TabView(getContext());
+        TabView tabView = new TabView(getContext());
         tabView.setOnClickListener(this);
         tabView.setText(text);
         tabView.setTextColor(mColorStateList);
@@ -138,26 +158,21 @@ public class KChartTabView extends RelativeLayout implements View.OnClickListene
         }
     }
 
-    public void setTextColor(ColorStateList color)
-    {
-        mColorStateList=color;
-        for(int i=0;i<mLlContainer.getChildCount();i++)
-        {
-            TabView tabView= (TabView) mLlContainer.getChildAt(i);
+    public void setTextColor(ColorStateList color) {
+        mColorStateList = color;
+        for (int i = 0; i < mLlContainer.getChildCount(); i++) {
+            TabView tabView = (TabView) mLlContainer.getChildAt(i);
             tabView.setTextColor(mColorStateList);
         }
-        if(mColorStateList!=null)
-        {
+        if (mColorStateList != null) {
             mTvFullScreen.setTextColor(mColorStateList);
         }
     }
 
-    public void setIndicatorColor(int color)
-    {
-        mIndicatorColor=color;
-        for(int i=0;i<mLlContainer.getChildCount();i++)
-        {
-            TabView tabView= (TabView) mLlContainer.getChildAt(i);
+    public void setIndicatorColor(int color) {
+        mIndicatorColor = color;
+        for (int i = 0; i < mLlContainer.getChildCount(); i++) {
+            TabView tabView = (TabView) mLlContainer.getChildAt(i);
             tabView.setIndicatorColor(mIndicatorColor);
         }
     }

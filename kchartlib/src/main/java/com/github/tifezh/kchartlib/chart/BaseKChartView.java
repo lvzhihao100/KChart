@@ -280,7 +280,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      * @param colorTop
      * @param colorEnd
      */
-    public void setShader(int colorTop, int colorEnd,int endY) {
+    public void setShader(int colorTop, int colorEnd, int endY) {
         Shader mShader = new LinearGradient(0, 0, 0, endY, new int[]{colorTop, colorEnd}, null, Shader.TileMode.REPEAT);
         mShaderPaint.setShader(mShader);
     }
@@ -481,7 +481,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
             }
         }
         //--------------画下方子图的值-------------
-        if (mChildDraw != null&&isDrawDown) {
+        if (mChildDraw != null && isDrawDown) {
             canvas.drawText(mChildDraw.getValueFormatter().format(mChildMaxValue), mPadingValue, mChildRect.top + baseLine, mTextPaint);
             canvas.drawText(mChildDraw.getValueFormatter().format(mChildMinValue), mPadingValue, mChildRect.bottom, mTextPaint);
         }
@@ -861,6 +861,10 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         checkAndFixScrollX();
         setTranslateXFromScrollX(mScrollX);
         super.onScaleChanged(scale, oldScale);
+    }
+
+    public void setTabBackGroundColor(int color) {
+        mKChartTabView.setTabBackgroundColor(color);
     }
 
     /**
