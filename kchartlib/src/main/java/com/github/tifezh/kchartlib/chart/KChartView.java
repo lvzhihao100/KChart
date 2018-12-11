@@ -18,6 +18,7 @@ import com.github.tifezh.kchartlib.chart.draw.MACDDraw;
 import com.github.tifezh.kchartlib.chart.draw.MainDraw;
 import com.github.tifezh.kchartlib.chart.draw.RSIDraw;
 import com.github.tifezh.kchartlib.chart.draw.VolumeDraw;
+import com.github.tifezh.kchartlib.chart.draw.WRDraw;
 
 /**
  * k线图
@@ -40,6 +41,7 @@ public class KChartView extends BaseKChartView {
     private MainDraw mMainDraw;
     private KDJDraw mKDJDraw;
     private VolumeDraw mVolumeDraw;
+    private WRDraw mWRDraw;
 
 
     public KChartView(Context context) {
@@ -67,21 +69,25 @@ public class KChartView extends BaseKChartView {
         mKDJDraw = new KDJDraw(this);
         mRSIDraw = new RSIDraw(this);
         mBOLLDraw = new BOLLDraw(this);
+        mWRDraw = new WRDraw(this);
         mMainDraw = new MainDraw(this);
         addChildDraw("VOL", mVolumeDraw);
         addChildDraw("MACD", mMACDDraw);
         addChildDraw("KDJ", mKDJDraw);
         addChildDraw("RSI", mRSIDraw);
-//        addChildDraw("BOLL", mBOLLDraw);
+        addChildDraw("WR", mWRDraw);
         setMainDraw(mMainDraw);
     }
-    public void setMainDrawMaShow(){
+
+    public void setMainDrawMaShow() {
         mMainDraw.setShowMa();
     }
-    public void setMainDrawBollShow(){
+
+    public void setMainDrawBollShow() {
         mMainDraw.setShowBoll();
     }
-    public void setMainDrawNoneShow(){
+
+    public void setMainDrawNoneShow() {
         mMainDraw.setShowNone();
     }
 
@@ -119,6 +125,9 @@ public class KChartView extends BaseKChartView {
                 setUpColor(array.getColor(R.styleable.KChartView_kc_dif_color, getColor(R.color.chart_ma5)));
                 setMbColor(array.getColor(R.styleable.KChartView_kc_dea_color, getColor(R.color.chart_ma10)));
                 setDnColor(array.getColor(R.styleable.KChartView_kc_macd_color, getColor(R.color.chart_ma20)));
+                //wr
+                setWrColor(array.getColor(R.styleable.KChartView_kc_wr_color, getColor(R.color.chart_ma20)));
+
                 //main
                 setMa5Color(array.getColor(R.styleable.KChartView_kc_dif_color, getColor(R.color.chart_ma5)));
                 setMa10Color(array.getColor(R.styleable.KChartView_kc_dea_color, getColor(R.color.chart_ma10)));
@@ -302,15 +311,16 @@ public class KChartView extends BaseKChartView {
 
     /**
      * 切换红涨绿跌
+     *
      * @param isTrue
      */
     public void setRedUpAndGreenDown(boolean isTrue) {
-        if (isTrue){
+        if (isTrue) {
             mVolumeDraw.setDownColor(R.color.chart_green);
             mMainDraw.setDownColor(R.color.chart_green);
             mVolumeDraw.setUpColor(R.color.chart_red);
             mMainDraw.setUpColor(R.color.chart_red);
-        }else {
+        } else {
             mVolumeDraw.setDownColor(R.color.chart_red);
             mMainDraw.setDownColor(R.color.chart_red);
             mVolumeDraw.setUpColor(R.color.chart_green);
@@ -335,6 +345,13 @@ public class KChartView extends BaseKChartView {
         mBOLLDraw.setDnColor(color);
         mMainDraw.setBollDnColor(color);
 
+    }
+
+    /**
+     * 设置wr颜色
+     */
+    public void setWrColor(int color) {
+        mWRDraw.seWrColor(color);
     }
 
     /**

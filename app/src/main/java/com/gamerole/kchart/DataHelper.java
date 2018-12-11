@@ -219,6 +219,7 @@ public class DataHelper {
         calculateBOLL(datas);
         calculateRSI(datas);
         calculateKDJ(datas);
+        calculateWR(datas);
         calculateVolumeMA(datas);
     }
 
@@ -247,6 +248,33 @@ public class DataHelper {
             } else {
                 entry.MA10Volume = (volumeMa10 / (i + 1f));
             }
+        }
+    }
+    /**
+     * 计算WR
+     *
+     * @param datas
+     */
+    static void calculateWR(List<Stock> datas) {
+        for (int i = 0; i < datas.size(); i++) {
+            Stock point = datas.get(i);
+            int startIndex = i - 8;
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
+            //9日最高价
+            float max9 = Float.MIN_VALUE;
+            //9日最低价
+            float min9 = Float.MAX_VALUE;
+
+            for (int index = startIndex; index <= i; index++) {
+                max9 = Math.max(max9, datas.get(index).getHighPrice());
+                min9 = Math.min(min9, datas.get(index).getLowPrice());
+            }
+            //当日收盘价
+            final float closePrice = point.getClosePrice();
+            float wr = 100f * (max9 - closePrice) / (max9 - min9);
+            point.wr = wr;
         }
     }
 }

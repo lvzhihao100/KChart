@@ -2,6 +2,8 @@ package com.github.tifezh.kchartlib.chart;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
@@ -37,6 +39,11 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * k线图
@@ -83,7 +90,9 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
 
     private Paint mGridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mWhitePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Paint mRedPaintRed = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mWhitePaintWhite = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mSunshinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
     private Paint mShaderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -210,6 +219,9 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     private ICandle lastItem;
     private ValueAnimator changePriceAnimator;
     private boolean isDrawDown = true;
+    private int drawSunshineCount = 0;
+    private boolean sunshinePlus;
+    private DisposableObserver<Long> disposableObserver;
 
     public BaseKChartView(Context context) {
         super(context);
@@ -240,10 +252,11 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         mDrawFillPaint.setStyle(Paint.Style.STROKE);
         mDrawFillPaint.setColor(Color.parseColor("#665D91E7"));
         mWhitePaint.setColor(Color.WHITE);
-        mRedPaintRed.setColor(Color.RED);
+        mWhitePaintWhite.setColor(Color.WHITE);
+        mSunshinePaint.setColor(Color.WHITE);
         mTextMaxMinPaint.setColor(Color.WHITE);
         mTextMaxMinPaint.setTextSize(sp2px(10));
-        mRedPaintRed.setStyle(Paint.Style.FILL_AND_STROKE);
+        mWhitePaintWhite.setStyle(Paint.Style.FILL_AND_STROKE);
         mShaderPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         Shader mShader = new LinearGradient(0, 0, 0, 1000, new int[]{Color.TRANSPARENT, Color.TRANSPARENT}, null, Shader.TileMode.REPEAT);
@@ -280,8 +293,8 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      * @param colorTop
      * @param colorEnd
      */
-    public void setShader(int colorTop, int colorEnd, int endY) {
-        Shader mShader = new LinearGradient(0, 0, 0, endY, new int[]{colorTop, colorEnd}, null, Shader.TileMode.REPEAT);
+    public void setShader(int colorTop, int colorMiddle, int colorEnd, int endY) {
+        Shader mShader = new LinearGradient(0, 0, 0, endY, new int[]{colorTop, colorMiddle, colorEnd}, new float[]{0.1f, 0.3f, 0.5f}, Shader.TileMode.REPEAT);
         mShaderPaint.setShader(mShader);
     }
 
@@ -341,6 +354,10 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         drawText(canvas);
         drawValue(canvas, isLongPress ? mSelectedIndex : mStopIndex);
         canvas.restore();
+        if (drawSunshineCount == 0) {
+            //画呼吸灯动画
+            updateMinuteRightCircle(mSunshinePaint);
+        }
     }
 
     public float getMainY(float value) {
@@ -516,14 +533,19 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
             //绘制最右边的点及线
             ICandle point = (ICandle) getItem(mStopIndex);
 
-            String closePrice = String.valueOf(point.getClosePrice());
+            String closePrice = formatValue(point.getClosePrice());
             float timeLineTextWidth = mTextPaint.measureText(closePrice);
 
             float endX = translateXtoX(getX(mStopIndex));
             float endY = getMainY(point.getClosePrice());
             canvas.drawLine(0, endY, endX, endY, mWhitePaint);
-            //绘制最右边的点
-            canvas.drawCircle(endX, endY, dp2px(2), mRedPaintRed);
+            //K线 绘制最右边的点
+            canvas.drawCircle(endX, endY, dp2px(2), mWhitePaintWhite);
+
+            //画呼吸灯
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.sunshine);
+            canvas.drawBitmap(bmp, endX - bmp.getWidth() / 2, endY - bmp.getHeight() / 2, mSunshinePaint);
+
             canvas.drawRect(0, endY - textHeight, timeLineTextWidth, endY, mBackgroundPaint);
             canvas.drawText(closePrice, 0, endY - textHeight + baseLine, mTextPaint);
             //绘制最高最低点指示文本
@@ -537,10 +559,16 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
             });
             float timeLineTextWidth = mTextPaint.measureText(NumberUtil.keepMax8(closePriceExact + ""));
             canvas.drawLine(0, drawBean.mMostRightY, translateXtoX(drawBean.mMostRightX), drawBean.mMostRightY, mWhitePaint);
-            //绘制最右边的点
-            canvas.drawCircle(translateXtoX(drawBean.mMostRightX), drawBean.mMostRightY, dp2px(2), mRedPaintRed);
+
+            //分时  绘制最右边的点
+            canvas.drawCircle(translateXtoX(drawBean.mMostRightX), drawBean.mMostRightY, dp2px(2), mWhitePaintWhite);
+
+            //画呼吸灯
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.sunshine);
+            canvas.drawBitmap(bmp, translateXtoX(drawBean.mMostRightX - bmp.getWidth() / 2), drawBean.mMostRightY - bmp.getHeight() / 2, mSunshinePaint);
+
             canvas.drawRect(0, drawBean.mMostRightY - textHeight, timeLineTextWidth, drawBean.mMostRightY, mBackgroundPaint);
-            canvas.drawText(NumberUtil.keepMax8(closePriceExact + ""), 0, drawBean.mMostRightY - textHeight + baseLine, mTextPaint);
+            canvas.drawText(formatValue(closePriceExact), 0, drawBean.mMostRightY - textHeight + baseLine, mTextPaint);
         }
 
         if (isLongPress) {
@@ -548,7 +576,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
             String text;
             String timeText;
             timeText = formatDateTime(mAdapter.getDate(mSelectedIndex));
-            text = instance.format(moveText);
+            text = formatValue(moveText);
             float r = textHeight / 2;
             y = getMainY(point.getClosePrice());
             float x;
@@ -584,6 +612,57 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     }
 
     /**
+     * 画分时K线右边呼吸灯
+     *
+     * @param mSunshinePaint
+     */
+    private void updateMinuteRightCircle(final Paint mSunshinePaint) {
+        disposableObserver = new DisposableObserver<Long>() {
+            @Override
+            public void onNext(Long aLong) {
+                if (sunshinePlus) {
+                    drawSunshineCount = drawSunshineCount - 50;
+                    mSunshinePaint.setAlpha(drawSunshineCount);
+                    if (drawSunshineCount < 10) {
+                        sunshinePlus = false;
+                    }
+                } else {
+                    drawSunshineCount = drawSunshineCount + 50;
+                    mSunshinePaint.setAlpha(drawSunshineCount);
+                    if (drawSunshineCount >= 250) {
+                        sunshinePlus = true;
+                    }
+                }
+                if (drawSunshineCount == 0) {
+                    drawSunshineCount++;
+                }
+                postInvalidate();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+
+            @Override
+            public void onComplete() {
+            }
+        };
+        Observable.interval(130, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.io()).subscribe(disposableObserver);
+    }
+
+    //页面不显示时，呼吸灯动画停止
+    public void closeObservable() {
+        disposableObserver.dispose();
+    }
+
+    //页面显示时，呼吸灯动画开始
+    public void startObservable() {
+        if (disposableObserver != null) {
+            Observable.interval(130, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.io()).subscribe(disposableObserver);
+        }
+    }
+
+    /**
      * 绘制 k线 下部填充
      *
      * @param canvas
@@ -595,20 +674,20 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         ICandle minCandle = (ICandle) mAdapter.getItem(drawBean.minPos);
         if (getX(drawBean.maxPos) > drawBean.centerX) {
             mTextMaxMinPaint.setTextAlign(Paint.Align.RIGHT);
-            canvas.drawText(maxCandle.getHighPrice() + "-->", translateXtoX(getX(drawBean.maxPos)), getMainY(maxCandle.getHighPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
+            canvas.drawText(formatValue(maxCandle.getHighPrice()) + "-->", translateXtoX(getX(drawBean.maxPos)), getMainY(maxCandle.getHighPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
         } else {
             mTextMaxMinPaint.setTextAlign(Paint.Align.LEFT);
 
-            canvas.drawText("<--" + maxCandle.getHighPrice(), translateXtoX(getX(drawBean.maxPos)), getMainY(maxCandle.getHighPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
+            canvas.drawText("<--" + formatValue(maxCandle.getHighPrice()), translateXtoX(getX(drawBean.maxPos)), getMainY(maxCandle.getHighPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
         }
         if (getX(drawBean.minPos) > drawBean.centerX) {
             mTextMaxMinPaint.setTextAlign(Paint.Align.RIGHT);
 
-            canvas.drawText(minCandle.getLowPrice() + "-->", translateXtoX(getX(drawBean.minPos)), getMainY(minCandle.getLowPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
+            canvas.drawText(formatValue(minCandle.getLowPrice()) + "-->", translateXtoX(getX(drawBean.minPos)), getMainY(minCandle.getLowPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
         } else {
             mTextMaxMinPaint.setTextAlign(Paint.Align.LEFT);
 
-            canvas.drawText("<--" + minCandle.getLowPrice(), translateXtoX(getX(drawBean.minPos)), getMainY(minCandle.getLowPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
+            canvas.drawText("<--" + formatValue(minCandle.getLowPrice()), translateXtoX(getX(drawBean.minPos)), getMainY(minCandle.getLowPrice()) + baseLine - textHeight / 2, mTextMaxMinPaint);
         }
     }
 
@@ -725,8 +804,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
                 float endLen = mDataLen;
                 float startLen = (mLastItemCount - 1) * mPointWidth;
                 if (endLen != startLen) {
-                    ValueAnimator valueAnimator = ValueAnimator.ofFloat(startLen, endLen)
-                            .setDuration(700);
+                    ValueAnimator valueAnimator = ValueAnimator.ofFloat(startLen, endLen).setDuration(700);
                     valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
                         public void onAnimationUpdate(ValueAnimator animation) {
@@ -781,8 +859,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     }
 
     private ValueAnimator getChangePriceAnimator(float startPrice, float endPrice) {
-        ValueAnimator newPriceValueAnimator = ValueAnimator.ofFloat(startPrice, endPrice)
-                .setDuration(1000);
+        ValueAnimator newPriceValueAnimator = ValueAnimator.ofFloat(startPrice, endPrice).setDuration(1000);
         newPriceValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

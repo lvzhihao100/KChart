@@ -8,6 +8,8 @@
 
     <com.github.tifezh.kchartlib.chart.KChartView
         android:id="@+id/minute_kchartview"
+        app:kc_tab_indicator_color="#00ff00"
+        app:kc_tab_background_color="#ff0000"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

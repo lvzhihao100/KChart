@@ -182,7 +182,7 @@ public class MainDraw implements IChartDraw<ICandle> {
 
     @Override
     public IValueFormatter getValueFormatter() {
-        return new ValueFormatter();
+        return view.getValueFormatter();
     }
 
     /**
@@ -257,10 +257,10 @@ public class MainDraw implements IChartDraw<ICandle> {
         List<String> stringValue = new ArrayList<>();
         stringValue.add(new DateFormatter().format(view.getAdapter().getDate(index)));
         stringValue.add(new TimeFormatter().format(view.getAdapter().getDate(index)));
-        stringValue.add("" + point.getHighPrice());
-        stringValue.add("" + point.getLowPrice());
-        stringValue.add("" + point.getOpenPrice());
-        stringValue.add("" + point.getClosePrice());
+        stringValue.add("" + getValueFormatter().format(point.getHighPrice()));
+        stringValue.add("" + getValueFormatter().format(point.getLowPrice()));
+        stringValue.add("" + getValueFormatter().format(point.getOpenPrice()));
+        stringValue.add("" + getValueFormatter().format(point.getClosePrice()));
         float height = padding * 8 + textHeight * strings.size();
 
 

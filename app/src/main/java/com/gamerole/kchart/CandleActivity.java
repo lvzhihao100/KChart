@@ -36,15 +36,15 @@ public class CandleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_kline);
         KChartView mMinuteKchartview = findViewById(R.id.minute_kchartview);
         mMinuteKchartview.setDrawTabView(true);
-        mMinuteKchartview.setShader(Color.WHITE,Color.YELLOW,1500);
+        mMinuteKchartview.setShader(Color.WHITE,Color.GREEN,Color.YELLOW,1500);
         mMinuteKchartview.setGridRows(4);
         mMinuteKchartview.setRedUpAndGreenDown(false);
         mMinuteKchartview.setGridColumns(5);
-        mMinuteKchartview.setVolumeMaGone(true);
+        mMinuteKchartview.setVolumeMaGone(false);
         mMinuteKchartview.setMainDrawBollShow();
         mMinuteKchartview.setDrawMinuteStyle(false);
         mMinuteKchartview.setDateTimeFormatter(new TimeFormatter());
-        mMinuteKchartview.setTabBackGroundColor(ContextCompat.getColor(this,R.color.chart_red));
+//        mMinuteKchartview.setTabBackGroundColor(ContextCompat.getColor(this,R.color.chart_red));
         mAdapter = new KChartAdapter();
         mMinuteKchartview.setAdapter(mAdapter);
         InputStream input = null;

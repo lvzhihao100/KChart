@@ -16,6 +16,8 @@ import com.github.tifezh.kchartlib.chart.entity.IVolume;
 import com.github.tifezh.kchartlib.chart.formatter.BigValueFormatter;
 import com.github.tifezh.kchartlib.utils.ViewUtil;
 
+import java.math.BigDecimal;
+
 /**
  * Created by hjm on 2017/11/14 17:49.
  */

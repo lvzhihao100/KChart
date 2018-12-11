@@ -8,6 +8,7 @@ import com.github.tifezh.kchartlib.chart.entity.IKLine;
 import com.github.tifezh.kchartlib.chart.entity.IMACD;
 import com.github.tifezh.kchartlib.chart.entity.IMinuteLine;
 import com.github.tifezh.kchartlib.chart.entity.IRSI;
+import com.github.tifezh.kchartlib.chart.entity.IWR;
 
 import java.util.Date;
 
@@ -15,7 +16,7 @@ import java.util.Date;
  * Created by Administrator on 2018/4/3.
  */
 
-public class Stock implements IKLine, IMinuteLine,IMACD,IRSI,IKDJ,IBOLL {
+public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR {
 
 
     public float MA5Price;
@@ -78,6 +79,7 @@ public class Stock implements IKLine, IMinuteLine,IMACD,IRSI,IKDJ,IBOLL {
     private String prevClose;
     private double high;
     private double low;
+    float wr;
     //    @SerializedName(value = "ewr")
     private long date;
 
@@ -310,6 +312,11 @@ public class Stock implements IKLine, IMinuteLine,IMACD,IRSI,IKDJ,IBOLL {
     @Override
     public float getRsi3() {
         return rsi3;
+    }
+
+    @Override
+    public float getWr() {
+        return wr;
     }
 }
 /**
