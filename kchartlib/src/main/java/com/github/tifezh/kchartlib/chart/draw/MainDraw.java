@@ -40,6 +40,7 @@ public class MainDraw implements IChartDraw<ICandle> {
     private Paint mRedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mWhitePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mGreenPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
     private Paint ma5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint ma10Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint ma20Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -90,6 +91,10 @@ public class MainDraw implements IChartDraw<ICandle> {
     public void setDownColor(@ColorRes int color) {
         mGreenPaint.setColor(ContextCompat.getColor(context, color));
     }
+    public void setMinuteLineColor( int color){
+        mLinePaint.setColor(color);
+
+    }
 
     @Override
     public void drawTranslated(@Nullable ICandle lastPoint, @NonNull ICandle curPoint, float lastX, float curX, @NonNull Canvas canvas, @NonNull BaseKChartView view, int position) {
@@ -107,10 +112,6 @@ public class MainDraw implements IChartDraw<ICandle> {
                     view.drawMainLine(canvas, ma10Paint, lastX, lastPoint.getMA10Price(), curX, curPoint.getMA10Price());
                 }
                 //画ma20
-                if (lastPoint.getMA20Price() != 0) {
-                    view.drawMainLine(canvas, ma20Paint, lastX, lastPoint.getMA20Price(), curX, curPoint.getMA20Price());
-                }
-                //画Boll
                 if (lastPoint.getMA20Price() != 0) {
                     view.drawMainLine(canvas, ma20Paint, lastX, lastPoint.getMA20Price(), curX, curPoint.getMA20Price());
                 }
@@ -149,13 +150,13 @@ public class MainDraw implements IChartDraw<ICandle> {
             IBOLL point = (IBOLL) view.getItem(position);
             String text = "BOLL:" + view.formatValue(point.getMb()) + " ";
             x += startPadding;
-            canvas.drawText(text, x, y, ma5Paint);
-            x += ma5Paint.measureText(text) + spacePadding;
+            canvas.drawText(text, x, y, mMbPaint);
+            x += mMbPaint.measureText(text) + spacePadding;
             text = "UB:" + view.formatValue(point.getUp()) + " ";
-            canvas.drawText(text, x, y, ma10Paint);
-            x += ma10Paint.measureText(text) + spacePadding;
+            canvas.drawText(text, x, y, mUpPaint);
+            x += mUpPaint.measureText(text) + spacePadding;
             text = "LB:" + view.formatValue(point.getDn()) + " ";
-            canvas.drawText(text, x, y, ma20Paint);
+            canvas.drawText(text, x, y, mDnPaint);
         }
         if (view.isLongPress() && !view.isDrawMinuteStyle()) {
             drawSelector(view, canvas);
@@ -377,6 +378,9 @@ public class MainDraw implements IChartDraw<ICandle> {
         ma20Paint.setStrokeWidth(width);
         ma10Paint.setStrokeWidth(width);
         ma5Paint.setStrokeWidth(width);
+        mUpPaint.setStrokeWidth(width);
+        mDnPaint.setStrokeWidth(width);
+        mMbPaint.setStrokeWidth(width);
     }
 
     /**
@@ -386,6 +390,9 @@ public class MainDraw implements IChartDraw<ICandle> {
         ma20Paint.setTextSize(textSize);
         ma10Paint.setTextSize(textSize);
         ma5Paint.setTextSize(textSize);
+        mUpPaint.setTextSize(textSize);
+        mDnPaint.setTextSize(textSize);
+        mMbPaint.setTextSize(textSize);
     }
 
     /**

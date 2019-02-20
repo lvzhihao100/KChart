@@ -23,7 +23,7 @@
         <!--rsi-->
         <attr name="kc_rsi1_color" format="color" />
         <attr name="kc_rsi2_color" format="color" />
-        <attr name="kc_ris3_color" format="color" />
+        <attr name="kc_rsi3_color" format="color" />
         <!--boll-->
         <attr name="kc_up_color" format="color" />
         <attr name="kc_mb_color" format="color" />
@@ -31,6 +31,7 @@
         <!--wr-->
         <attr name="kc_wr_color" format="color" />
         <!--main-->
+        <attr name="kc_minute_line_color" format="color" />
         <attr name="kc_ma5_color" format="color" />
         <attr name="kc_ma10_color" format="color" />
         <attr name="kc_ma20_color" format="color" />

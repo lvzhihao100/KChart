@@ -863,7 +863,12 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         newPriceValueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                ((ICandle) mAdapter.getItem(mAdapter.getCount() - 1)).setClosePrice((Float) animation.getAnimatedValue());
+                int position = mAdapter.getCount() - 1;
+                if (position < 0) {
+                    return;
+                }
+                ((ICandle) mAdapter.getItem(position)).setClosePrice((Float) animation.getAnimatedValue());
+
                 invalidate();
             }
         });

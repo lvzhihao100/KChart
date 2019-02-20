@@ -113,25 +113,26 @@ public class KChartView extends BaseKChartView {
                 setMACDColor(array.getColor(R.styleable.KChartView_kc_macd_color, getColor(R.color.chart_ma20)));
 
                 //kdj
-                setKColor(array.getColor(R.styleable.KChartView_kc_dif_color, getColor(R.color.chart_ma5)));
+                setKColor(array.getColor(R.styleable.KChartView_kc_k_color, getColor(R.color.chart_ma5)));
 
-                setDColor(array.getColor(R.styleable.KChartView_kc_dea_color, getColor(R.color.chart_ma10)));
-                setJColor(array.getColor(R.styleable.KChartView_kc_macd_color, getColor(R.color.chart_ma20)));
+                setDColor(array.getColor(R.styleable.KChartView_kc_d_color, getColor(R.color.chart_ma10)));
+                setJColor(array.getColor(R.styleable.KChartView_kc_j_color, getColor(R.color.chart_ma20)));
                 //rsi
-                setRSI1Color(array.getColor(R.styleable.KChartView_kc_dif_color, getColor(R.color.chart_ma5)));
-                setRSI2Color(array.getColor(R.styleable.KChartView_kc_dea_color, getColor(R.color.chart_ma10)));
-                setRSI3Color(array.getColor(R.styleable.KChartView_kc_macd_color, getColor(R.color.chart_ma20)));
+                setRSI1Color(array.getColor(R.styleable.KChartView_kc_rsi1_color, getColor(R.color.chart_ma5)));
+                setRSI2Color(array.getColor(R.styleable.KChartView_kc_rsi2_color, getColor(R.color.chart_ma10)));
+                setRSI3Color(array.getColor(R.styleable.KChartView_kc_rsi3_color, getColor(R.color.chart_ma20)));
                 //boll
-                setUpColor(array.getColor(R.styleable.KChartView_kc_dif_color, getColor(R.color.chart_ma5)));
-                setMbColor(array.getColor(R.styleable.KChartView_kc_dea_color, getColor(R.color.chart_ma10)));
-                setDnColor(array.getColor(R.styleable.KChartView_kc_macd_color, getColor(R.color.chart_ma20)));
+                setUpColor(array.getColor(R.styleable.KChartView_kc_up_color, getColor(R.color.chart_ma5)));
+                setMbColor(array.getColor(R.styleable.KChartView_kc_mb_color, getColor(R.color.chart_ma10)));
+                setDnColor(array.getColor(R.styleable.KChartView_kc_dn_color, getColor(R.color.chart_ma20)));
                 //wr
                 setWrColor(array.getColor(R.styleable.KChartView_kc_wr_color, getColor(R.color.chart_ma20)));
 
                 //main
-                setMa5Color(array.getColor(R.styleable.KChartView_kc_dif_color, getColor(R.color.chart_ma5)));
-                setMa10Color(array.getColor(R.styleable.KChartView_kc_dea_color, getColor(R.color.chart_ma10)));
-                setMa20Color(array.getColor(R.styleable.KChartView_kc_macd_color, getColor(R.color.chart_ma20)));
+                setMinuteLineColor(array.getColor(R.styleable.KChartView_kc_minute_line_color, getColor(R.color.blue_5d)));
+                setMa5Color(array.getColor(R.styleable.KChartView_kc_ma5_color, getColor(R.color.chart_ma5)));
+                setMa10Color(array.getColor(R.styleable.KChartView_kc_ma10_color, getColor(R.color.chart_ma10)));
+                setMa20Color(array.getColor(R.styleable.KChartView_kc_ma20_color, getColor(R.color.chart_ma20)));
                 setCandleWidth(array.getDimension(R.styleable.KChartView_kc_candle_width, getDimension(R.dimen.chart_candle_width)));
                 setCandleLineWidth(array.getDimension(R.styleable.KChartView_kc_candle_line_width, getDimension(R.dimen.chart_candle_line_width)));
                 setSelectorBackgroundColor(array.getColor(R.styleable.KChartView_kc_selector_background_color, getColor(R.color.chart_selector)));
@@ -383,6 +384,14 @@ public class KChartView extends BaseKChartView {
     public void setMa5Color(int color) {
         mMainDraw.setMa5Color(color);
         mVolumeDraw.setMa5Color(color);
+    }
+
+    /**
+     * 设置分时线颜色
+     * @param color
+     */
+    public void setMinuteLineColor(int color) {
+        mMainDraw.setMinuteLineColor(color);
     }
 
 

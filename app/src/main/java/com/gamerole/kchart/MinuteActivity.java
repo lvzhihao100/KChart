@@ -40,7 +40,7 @@ public class MinuteActivity extends AppCompatActivity {
         mMinuteKchartview.setShader(Color.WHITE,Color.GREEN,Color.YELLOW,1500);//设置分时下部渐变阴影
         mMinuteKchartview.setGridRows(2);//设置珊格线个数
         mMinuteKchartview.setGridColumns(2);
-        mMinuteKchartview.setDrawMinuteStyle(true);//设置分时
+        mMinuteKchartview.setDrawMinuteStyle(false);//设置分时
         mMinuteKchartview.setRedUpAndGreenDown(false);
         mMinuteKchartview.setDateTimeFormatter(new TimeFormatter());
         mAdapter = new KChartAdapter();
