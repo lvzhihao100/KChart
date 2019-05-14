@@ -1,12 +1,17 @@
 package com.gamerole.kchart;
 
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 import com.github.tifezh.kchartlib.chart.BaseKChartAdapter;
+import com.github.tifezh.kchartlib.chart.BaseKChartView;
+import com.github.tifezh.kchartlib.chart.DataHelper;
 import com.github.tifezh.kchartlib.chart.KChartView;
 import com.github.tifezh.kchartlib.chart.formatter.TimeFormatter;
 import com.google.gson.Gson;
@@ -29,21 +34,38 @@ public class CandleActivity extends AppCompatActivity {
 
     private KChartAdapter mAdapter;
     private List<Stock> stocksAdd;
+    private boolean isShow;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kline);
-        KChartView mMinuteKchartview = findViewById(R.id.minute_kchartview);
+        final KChartView mMinuteKchartview = findViewById(R.id.minute_kchartview);
         mMinuteKchartview.setDrawTabView(true);
-        mMinuteKchartview.setShader(Color.WHITE,Color.GREEN,Color.YELLOW,1500);
+        mMinuteKchartview.setShader(Color.WHITE, Color.GREEN, Color.YELLOW, 1500);
         mMinuteKchartview.setGridRows(4);
         mMinuteKchartview.setRedUpAndGreenDown(false);
-        mMinuteKchartview.setGridColumns(5);
+        mMinuteKchartview.setGridColumns(4);
         mMinuteKchartview.setVolumeMaGone(false);
         mMinuteKchartview.setMainDrawBollShow();
         mMinuteKchartview.setDrawMinuteStyle(false);
+        mMinuteKchartview.setBreathColor(Color.GREEN);
         mMinuteKchartview.setDateTimeFormatter(new TimeFormatter());
+        mMinuteKchartview.setSelectorBackgroundColor(Color.GREEN);
+        mMinuteKchartview.setTextColor(Color.RED);
+        mMinuteKchartview.setCurrentDownText("123123123");
+        mMinuteKchartview.setCurrentDownText2("123123123");
+        mMinuteKchartview.setUpDownPadding(30);
+        mMinuteKchartview.setLabel("杀生科技");
+        mMinuteKchartview.setDrawVolume(false);
+        mMinuteKchartview.setDrawDown(false);
+        mMinuteKchartview.setLightDrawable(R.drawable.ada);
+        mMinuteKchartview.setLabelGravity(BaseKChartView.Gravity.RIGHT);
+        Paint paint = mMinuteKchartview.getmCurrentLinePaint();
+//        paint.setStyle(Paint.Style.STROKE);
+//        paint.setPathEffect(new DashPathEffect(new float[]{10, 10}, 0));
+        paint.setColor(Color.RED);
+
 //        mMinuteKchartview.setTabBackGroundColor(ContextCompat.getColor(this,R.color.chart_red));
         mAdapter = new KChartAdapter();
         mMinuteKchartview.setAdapter(mAdapter);
@@ -54,7 +76,8 @@ public class CandleActivity extends AppCompatActivity {
             HttpResult<List<Stock>> httpResult = new Gson().fromJson(json, new TypeToken<HttpResult<List<Stock>>>() {
             }.getType());
             Collections.reverse(httpResult.getData());
-            DataHelper.calculate(httpResult.getData());
+
+            DataUtil.calculate(httpResult.getData());
             List<Stock> stocks = httpResult.getData().subList(0, 100);
             stocksAdd = httpResult.getData().subList(100, httpResult.getData().size());
             mAdapter.updateData(stocks);
@@ -62,16 +85,65 @@ public class CandleActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        findViewById(R.id.btBoll).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMinuteKchartview.setMainDrawBollShow();
+            }
+        });
+        findViewById(R.id.btMa).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMinuteKchartview.setMainDrawMaShow();
+
+            }
+        });
+        findViewById(R.id.btKdj).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMinuteKchartview.changeKDJ();
+
+            }
+        });
+        findViewById(R.id.btMacd).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMinuteKchartview.changeMACD();
+
+            }
+        });
+        findViewById(R.id.btRsi).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMinuteKchartview.changeRSI();
+
+            }
+        });
+        findViewById(R.id.btWr).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMinuteKchartview.changeWR();
+
+            }
+        });
+        findViewById(R.id.btToggle).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isShow = !isShow;
+                mMinuteKchartview.setDrawDown(isShow);
+
+            }
+        });
 
     }
 
     private void startTimer() {
-        Flowable.intervalRange(0,stocksAdd.size(),0,2,TimeUnit.SECONDS)
+        Flowable.intervalRange(0, stocksAdd.size(), 0, 2, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
-                        mAdapter.addNewData(stocksAdd.get(aLong.intValue()));
+                        mAdapter.changeLastItemClosePrice(stocksAdd.get(aLong.intValue()).getClosePrice());
                     }
                 });
     }
@@ -138,11 +210,12 @@ public class CandleActivity extends AppCompatActivity {
                 notifyItemRangeInsertedToLast();
             }
         }
+
         /**
          * 向头部添加数据
          */
         public void addNewData(Stock data) {
-            if (data != null ) {
+            if (data != null) {
                 datas.add(data);
                 notifyItemRangeInsertedToLast();
             }

@@ -1,13 +1,14 @@
 package com.gamerole.kchart;
 
-import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 
 import com.github.tifezh.kchartlib.chart.BaseKChartAdapter;
+import com.github.tifezh.kchartlib.chart.BaseKChartView;
 import com.github.tifezh.kchartlib.chart.KChartView;
 import com.github.tifezh.kchartlib.chart.formatter.TimeFormatter;
 import com.google.gson.Gson;
@@ -38,12 +39,19 @@ public class MinuteActivity extends AppCompatActivity {
         KChartView mMinuteKchartview = findViewById(R.id.minute_kchartview);
         mMinuteKchartview.setDrawTabView(false);
         mMinuteKchartview.setShader(Color.WHITE,Color.GREEN,Color.YELLOW,1500);//设置分时下部渐变阴影
-        mMinuteKchartview.setGridRows(2);//设置珊格线个数
-        mMinuteKchartview.setGridColumns(2);
-        mMinuteKchartview.setDrawMinuteStyle(false);//设置分时
+        mMinuteKchartview.setGridRows(5);//设置珊格线个数
+        mMinuteKchartview.setGridColumns(4);
+        mMinuteKchartview.setDrawMinuteStyle(true);//设置分时
         mMinuteKchartview.setRedUpAndGreenDown(false);
         mMinuteKchartview.setDateTimeFormatter(new TimeFormatter());
+        mMinuteKchartview.setLabelGravity(BaseKChartView.Gravity.RIGHT);
+        Paint paint = mMinuteKchartview.getmCurrentLinePaint();
+//        paint.setStyle(Paint.Style.STROKE);
+//        paint.setPathEffect(new DashPathEffect(new float[]{10, 10}, 0));
+        paint.setColor(Color.RED);
         mAdapter = new KChartAdapter();
+        mMinuteKchartview.setCurrentDownText("123123123");
+        mMinuteKchartview.setMinuteLineWidth(1);
         mMinuteKchartview.setAdapter(mAdapter);
         InputStream input = null;
         try {
@@ -55,7 +63,7 @@ public class MinuteActivity extends AppCompatActivity {
             List<Stock> stocks = httpResult.getData().subList(0, 100);
             stocksAdd = httpResult.getData().subList(100, httpResult.getData().size());
             mAdapter.updateData(stocks);
-            startTimer();
+//            startTimer();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,7 +87,7 @@ public class MinuteActivity extends AppCompatActivity {
      * @param is
      * @return
      */
-    private static String convertStreamToString(java.io.InputStream is) {
+    private static String convertStreamToString(InputStream is) {
         String s = null;
         try {
             Scanner scanner = new Scanner(is, "UTF-8").useDelimiter("\\A");

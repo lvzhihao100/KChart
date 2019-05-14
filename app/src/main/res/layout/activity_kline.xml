@@ -5,10 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MinuteActivity">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="600pt"
+                android:text="123123131231"
+                android:textSize="80pt" />
             <com.github.tifezh.kchartlib.chart.KChartView
                 android:id="@+id/minute_kchartview"
                 android:layout_width="match_parent"
@@ -16,5 +28,64 @@
                 app:kc_tab_background_color="#ff0000"
                 app:kc_tab_indicator_color="#00ff00" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btMa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MA" />
+
+                <Button
+                    android:id="@+id/btBoll"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BOLL" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btMacd"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MACD" />
+
+                <Button
+                    android:id="@+id/btKdj"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="KDJ" />
+
+                <Button
+                    android:id="@+id/btRsi"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RSI" />
+
+                <Button
+                    android:id="@+id/btWr"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WR" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="隐藏显示" />
         </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
 </android.support.constraint.ConstraintLayout>

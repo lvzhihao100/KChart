@@ -8,6 +8,7 @@ import com.github.tifezh.kchartlib.chart.entity.IKLine;
 import com.github.tifezh.kchartlib.chart.entity.IMACD;
 import com.github.tifezh.kchartlib.chart.entity.IMinuteLine;
 import com.github.tifezh.kchartlib.chart.entity.IRSI;
+import com.github.tifezh.kchartlib.chart.entity.IUpDown;
 import com.github.tifezh.kchartlib.chart.entity.IWR;
 
 import java.util.Date;
@@ -16,7 +17,7 @@ import java.util.Date;
  * Created by Administrator on 2018/4/3.
  */
 
-public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR {
+public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR, IUpDown {
 
 
     public float MA5Price;
@@ -121,8 +122,18 @@ public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR
     }
 
     @Override
+    public void setMA5Volume(float ma5Volume) {
+        MA5Volume=ma5Volume;
+    }
+
+    @Override
     public float getMA10Volume() {
         return MA10Volume;
+    }
+
+    @Override
+    public void setMA10Volume(float ma10Volume) {
+MA10Volume=ma10Volume;
     }
 
     public void setVolume(double volume) {
@@ -180,13 +191,28 @@ public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR
     }
 
     @Override
+    public void setMA5Price(float ma5Price) {
+MA5Price=ma5Price;
+    }
+
+    @Override
     public float getMA10Price() {
         return MA10Price;
     }
 
     @Override
+    public void setMA10Price(float ma10Price) {
+
+    }
+
+    @Override
     public float getMA20Price() {
         return MA20Price;
+    }
+
+    @Override
+    public void setMA20Price(float ma20Price) {
+
     }
 
     @Override
@@ -260,8 +286,18 @@ public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR
     }
 
     @Override
+    public void setUp(float up) {
+
+    }
+
+    @Override
     public float getMb() {
         return mb;
+    }
+
+    @Override
+    public void setMb(float mb) {
+
     }
 
     @Override
@@ -270,8 +306,18 @@ public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR
     }
 
     @Override
+    public void setDn(float dn) {
+
+    }
+
+    @Override
     public float getK() {
         return k;
+    }
+
+    @Override
+    public void setK(float k) {
+
     }
 
     @Override
@@ -280,8 +326,18 @@ public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR
     }
 
     @Override
+    public void setD(float d) {
+
+    }
+
+    @Override
     public float getJ() {
         return j;
+    }
+
+    @Override
+    public void setJ(float j) {
+
     }
 
     @Override
@@ -290,13 +346,28 @@ public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR
     }
 
     @Override
+    public void setDea(float dea) {
+
+    }
+
+    @Override
     public float getDif() {
         return dif;
     }
 
     @Override
+    public void setDif(float dif) {
+
+    }
+
+    @Override
     public float getMacd() {
         return macd;
+    }
+
+    @Override
+    public void setMacd(float macd) {
+
     }
 
     @Override
@@ -315,8 +386,48 @@ public class Stock implements IKLine, IMinuteLine, IMACD, IRSI, IKDJ, IBOLL, IWR
     }
 
     @Override
+    public void setRsi1(float rsi1) {
+
+    }
+
+    @Override
+    public void setRsi2(float rsi2) {
+
+    }
+
+    @Override
+    public void setRsi3(float rsi3) {
+
+    }
+
+    @Override
     public float getWr() {
         return wr;
+    }
+
+    @Override
+    public void setWr(float wr) {
+
+    }
+
+    @Override
+    public Float getSellPrice() {
+        return Double.valueOf(high).floatValue();
+    }
+
+    @Override
+    public void setSellPrice() {
+
+    }
+
+    @Override
+    public Float getBuyPrice() {
+        return Double.valueOf(low).floatValue();
+    }
+
+    @Override
+    public void setBuyPrice() {
+
     }
 }
 /**
