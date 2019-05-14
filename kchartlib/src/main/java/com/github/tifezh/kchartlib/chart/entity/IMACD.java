@@ -6,22 +6,27 @@ package com.github.tifezh.kchartlib.chart.entity;
  * Created by tifezh on 2016/6/10.
  */
 
-public interface IMACD {
+public interface IMACD extends ILine{
 
 
     /**
      * DEA值
      */
     float getDea();
+    void setDea(float dea);
 
     /**
      * DIF值
      */
     float getDif();
+    void setDif(float dif);
+
 
     /**
      * MACD值
      */
     float getMacd();
+    void setMacd(float macd);
+
 
 }

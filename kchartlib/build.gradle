@@ -1,22 +1,21 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
-uploadArchives{
-    repositories.mavenDeployer{
-        repository(url:LOCAL_REPO_URL)
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: LOCAL_REPO_URL)
         pom.groupId = GROUP_ID
         pom.artifactId = ARTIFACTID
         pom.version = LIBRARY_VERSION
     }
 }
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
@@ -35,7 +34,8 @@ android {
 }
 
 dependencies {
-    compileOnly 'com.android.support:appcompat-v7:26.1.0'
-    api 'io.reactivex.rxjava2:rxjava:2.1.3'
+    implementation 'com.android.support:appcompat-v7:27.0.1'
 
+    api 'io.reactivex.rxjava2:rxjava:2.1.12'
+    implementation 'com.android.support:support-v4:27.0.1'
 }

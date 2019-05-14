@@ -6,16 +6,20 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.support.v4.view.GestureDetectorCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 
 import com.github.tifezh.kchartlib.R;
@@ -32,8 +36,6 @@ import com.github.tifezh.kchartlib.chart.entity.SimpleCandle;
 import com.github.tifezh.kchartlib.chart.formatter.TimeFormatter;
 import com.github.tifezh.kchartlib.chart.formatter.ValueFormatter;
 import com.github.tifezh.kchartlib.chart.observer.KChartDataObserver;
-import com.github.tifezh.kchartlib.utils.NumberUtil;
-import com.github.tifezh.kchartlib.utils.ViewUtil;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     private int mChildDrawPosition = 0;
 
     private float mTranslateX = 0;
+    protected int breathColor = Color.WHITE;
 
     private int mWidth = 0;
 
@@ -77,6 +80,9 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     private float mChildMaxValue = Float.MAX_VALUE;
 
     private float mChildMinValue = 0;
+    private float mVolumeMaxValue = Float.MAX_VALUE;
+
+    private float mVolumeMinValue = 0;
 
     private int mStartIndex = 0;
 
@@ -89,22 +95,29 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     private int mGridColumns = 4;
 
     private Paint mGridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private Paint mWhitePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    protected Paint mWhitePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mWhitePaintWhite = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mSunshinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mUpPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mDownPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private Paint mShaderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mTextCurrentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mTextMaxMinPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private Paint mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private Paint mSelectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mCurrentPricePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mCurrentLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private int mSelectedIndex;
 
     private IChartDraw mMainDraw;
+    private IChartDraw mVolumeDraw;
 
     private IAdapter mAdapter;
 
@@ -144,8 +157,6 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
 
     private IValueFormatter mValueFormatter;
     private IDateTimeFormatter mDateTimeFormatter;
-
-    protected KChartTabView mKChartTabView;
 
 
     private long mAnimationDuration = 500;
@@ -222,6 +233,89 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     private int drawSunshineCount = 0;
     private boolean sunshinePlus;
     private DisposableObserver<Long> disposableObserver;
+    private Rect mVolumeRect;
+    private float mLastVolumeMaxValue;
+    private float mLastVolumeMinValue;
+    private float mVolumeScaleY = 1;
+    private int mHeight;
+    private float drawMarginWith;
+    private float upDownWidth = 20;
+    private float upDownPadding = 5;
+    private boolean isDrawUpDown = true;
+    private String currentDownText;
+    private String currentDownText2;
+    private float currentDownTextPaddingLeft;
+    private float buy;
+    private float sell;
+    private String label;
+    private float mLabelLeft;
+    private float mLabelTop;
+    private boolean isDrawVolume = true;
+    private int lightDrawable = R.drawable.sunshine;
+    private float textHeight;
+    private float baseLine;
+    private Path mCurrentLinePath;
+
+    public void setDrawVolume(boolean drawVolume) {
+        isDrawVolume = drawVolume;
+        initRect(mWidth, mHeight);
+        invalidate();
+    }
+
+    public void setUpDownPadding(float upDownPadding) {
+        this.upDownPadding = upDownPadding;
+    }
+
+    public void setLightDrawable(int lightDrawable) {
+        this.lightDrawable = lightDrawable;
+    }
+
+    public Paint getmLabelPaint() {
+        return mLabelPaint;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public void setmLabelLeft(float mLabelLeft) {
+        this.mLabelLeft = mLabelLeft;
+    }
+
+    public void setmLabelTop(float mLabelTop) {
+        this.mLabelTop = mLabelTop;
+    }
+
+    public void setUpDownWidth(float upDownWidth) {
+        this.upDownWidth = upDownWidth;
+    }
+
+    public void setBuy(float buy) {
+        this.buy = buy;
+    }
+
+    public void setSell(float sell) {
+        this.sell = sell;
+    }
+
+    public void setCurrentDownTextPaddingLeft(float currentDownTextPaddingLeft) {
+        this.currentDownTextPaddingLeft = dp2px(currentDownTextPaddingLeft);
+    }
+
+    public void setDrawUpDown(boolean drawUpDown) {
+        isDrawUpDown = drawUpDown;
+    }
+
+    public void setCurrentDownText2(String currentDownText2) {
+        this.currentDownText2 = currentDownText2;
+    }
+
+    public enum Gravity {
+        LEFT, RIGHT
+    }
+
+    private Gravity labelGravity = Gravity.RIGHT;
+
 
     public BaseKChartView(Context context) {
         super(context);
@@ -240,7 +334,12 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
 
     public void setDrawDown(boolean drawDown) {
         isDrawDown = drawDown;
+        initRect(mWidth, mHeight);
         invalidate();
+    }
+
+    public Paint getmTextCurrentPaint() {
+        return mTextCurrentPaint;
     }
 
     private void init() {
@@ -255,10 +354,20 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         mWhitePaintWhite.setColor(Color.WHITE);
         mSunshinePaint.setColor(Color.WHITE);
         mTextMaxMinPaint.setColor(Color.WHITE);
+        mTextCurrentPaint.setColor(Color.WHITE);
+        mCurrentPricePaint.setColor(Color.WHITE);
+        mCurrentLinePaint.setColor(Color.WHITE);
+        mCurrentLinePaint.setStyle(Paint.Style.STROKE);
+        mCurrentLinePaint.setPathEffect(new DashPathEffect(new float[]{10, 10}, 0));
+        mCurrentLinePath = new Path();
+        shaderPath = new Path();
+        mLabelPaint.setColor(Color.WHITE);
+        mLabelPaint.setTextSize(sp2px(20));
         mTextMaxMinPaint.setTextSize(sp2px(10));
         mWhitePaintWhite.setStyle(Paint.Style.FILL_AND_STROKE);
         mShaderPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-
+        mUpPaint.setColor(getResources().getColor(R.color.chart_green));
+        mDownPaint.setColor(getResources().getColor(R.color.chart_red));
         Shader mShader = new LinearGradient(0, 0, 0, 1000, new int[]{Color.TRANSPARENT, Color.TRANSPARENT}, null, Shader.TileMode.REPEAT);
         mShaderPaint.setShader(mShader);
 
@@ -268,23 +377,47 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         mScaleDetector = new ScaleGestureDetector(getContext(), this);
         mTopPadding = (int) getResources().getDimension(R.dimen.chart_top_padding);
         mBottomPadding = (int) getResources().getDimension(R.dimen.chart_bottom_padding);
+        mLabelLeft = (int) getResources().getDimension(R.dimen.chart_bottom_padding);
+//        mKChartTabView = new KChartTabView(getContext());
+//        addView(mKChartTabView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//
+//        mKChartTabView.setOnTabSelectListener(new KChartTabView.TabSelectListener() {
+//            @Override
+//            public void onTabSelected(int type) {
+//                setChildDraw(type);
+//            }
+//        });
 
-        mKChartTabView = new KChartTabView(getContext());
-        addView(mKChartTabView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        mKChartTabView.setOnTabSelectListener(new KChartTabView.TabSelectListener() {
-            @Override
-            public void onTabSelected(int type) {
-                setChildDraw(type);
-            }
-        });
+        Paint.FontMetrics fm = mTextPaint.getFontMetrics();
+        textHeight = fm.descent - fm.ascent;
+        baseLine = (textHeight - fm.bottom - fm.top) / 2;
 
     }
 
+    public void setVolumeDrawShow(boolean isDrawVolume) {
+
+    }
+
+    public Paint getmUpPaint() {
+        return mUpPaint;
+    }
+
+    public Paint getmDownPaint() {
+        return mDownPaint;
+    }
+
     public void setVolumeMaGone(boolean isGone) {
-        if (mChildDraw instanceof VolumeDraw) {
-            ((VolumeDraw) mChildDraw).setMaGone(isGone);
+        if (mVolumeDraw != null) {
+            ((VolumeDraw) mVolumeDraw).setMaGone(isGone);
         }
+    }
+
+    public Paint getmCurrentPricePaint() {
+        return mCurrentPricePaint;
+    }
+
+    public Paint getmCurrentLinePaint() {
+        return mCurrentLinePaint;
     }
 
     /**
@@ -306,37 +439,38 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         this.mWidth = w;
+        this.mHeight = h;
+        drawMarginWith = w / mGridColumns;
         String format = formatValue(0f);
-
-        if (!mDrawTabView) {
-            mKChartTabView.setVisibility(INVISIBLE);
-        }
-
         if (mIsOutward) {
             mLeftTitleMargin = mTextPaint.measureText(format, 0, format.length()) + 2 * mPadingValue;
         } else {
             mLeftTitleMargin = 0;
         }
         initRect(w, h);
-        mKChartTabView.setTranslationY(mMainRect.bottom);
-        mKChartTabView.setTranslationX(mLeftTitleMargin);
+//        mKChartTabView.setTranslationY(mMainRect.bottom);
+//        mKChartTabView.setTranslationX(mLeftTitleMargin);
         setTranslateXFromScrollX(mScrollX);
     }
 
     private void initRect(int w, int h) {
-        int mMainChildSpace = mKChartTabView.getMeasuredHeight() == 0 ? ViewUtil.Dp2Px(getContext(), 5) : mKChartTabView.getMeasuredHeight();
-        int displayHeight = h - mTopPadding - mBottomPadding - mMainChildSpace;
-        int mMainHeight = 0;
-        int mChildHeight = 0;
-        if (isDrawDown) {
-            mMainHeight = (int) (displayHeight * 0.75f);
-            mChildHeight = (int) (displayHeight * 0.25f);
-        } else {
-            mMainHeight = (int) (displayHeight * 1f);
-        }
-        mMainRect = new Rect(0, mTopPadding, mWidth, mTopPadding + mMainHeight);
-        mTabRect = new Rect(0, mMainRect.bottom, mWidth, mMainRect.bottom + mMainChildSpace);
-        mChildRect = new Rect(0, mTabRect.bottom, mWidth, mTabRect.bottom + mChildHeight);
+        int displayHeight = h - mBottomPadding;
+        int mMainHeight;
+        int mVolumeHeight;
+        int mChildHeight;
+
+        int mainPercent = 7;
+        int volumePercent = isDrawVolume ? 2 : 0;
+        int childPercent = isDrawDown ? 2 : 0;
+        int allPercent = mainPercent + volumePercent + childPercent;
+        mMainHeight = (displayHeight * mainPercent / allPercent);
+        mVolumeHeight = (displayHeight * volumePercent / allPercent);
+        mChildHeight = (displayHeight * childPercent / allPercent);
+        mMainRect = new Rect(0, mMainHeight / 7, mWidth, mMainHeight);
+        mLabelTop = mMainRect.bottom - dp2px(20);
+        mVolumeRect = new Rect(0, mMainRect.bottom, mWidth, mMainRect.bottom + mVolumeHeight);
+
+        mChildRect = new Rect(0, mVolumeRect.bottom, mWidth, mVolumeRect.bottom + mChildHeight);
     }
 
     @Override
@@ -349,14 +483,56 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         calculateValue();
         canvas.save();
         canvas.scale(1, 1);
+        if (!TextUtils.isEmpty(label)) {
+            drawLabel(canvas);
+        }
         drawGird(canvas);
         drawK(canvas);
         drawText(canvas);
         drawValue(canvas, isLongPress ? mSelectedIndex : mStopIndex);
-        canvas.restore();
+        if (isDrawUpDown) {
+            drawUpDown(canvas);
+        }
         if (drawSunshineCount == 0) {
             //画呼吸灯动画
             updateMinuteRightCircle(mSunshinePaint);
+        }
+        canvas.restore();
+    }
+
+    private void drawLabel(Canvas canvas) {
+        canvas.drawText(label, mLabelLeft, mLabelTop, mLabelPaint);
+    }
+
+    public void setCurrentDownText(String currentDownText) {
+        this.currentDownText = currentDownText;
+    }
+
+    private void drawUpDown(Canvas canvas) {
+        if (mScrollX == 0) {//滑动到末端
+            if (sell != 0 && buy != 0) {
+
+                ICandle iCandle = (ICandle) getItem(mAdapter.getCount() - 1);
+                float priceY = getMainY(iCandle.getClosePrice());
+
+                float highY = getMainY(sell);
+                if (highY > priceY) {
+                    int section = mMainRect.height() / 20;
+                    highY = priceY - section;
+                }
+                RectF rectFUp = new RectF(mWidth - upDownWidth, highY,
+                        mWidth, priceY);
+                canvas.drawRect(rectFUp, mUpPaint);
+
+                float lowY = getMainY(buy);
+                if (lowY < priceY) {
+                    int section = mMainRect.height() / 20;
+                    lowY = priceY + section;
+                }
+                RectF rectFDown = new RectF(mWidth - upDownWidth, priceY,
+                        mWidth, lowY);
+                canvas.drawRect(rectFDown, mDownPaint);
+            }
         }
     }
 
@@ -367,6 +543,10 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
 
     public float getChildY(float value) {
         return (mChildMaxValue - value) * mChildScaleY + mChildRect.top;
+    }
+
+    public float getVolumeY(float value) {
+        return (mVolumeMaxValue - value) * mVolumeScaleY + mVolumeRect.top;
     }
 
     /**
@@ -385,32 +565,24 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     private void drawGird(Canvas canvas) {
         //-----------------------上方k线图------------------------
         //横向的grid
-        float rowSpace = mMainRect.height() / mGridRows;
-        for (int i = 0; i <= mGridRows; i++) {
-            if (mDrawGirdLine) {
-                canvas.drawLine(mLeftTitleMargin, rowSpace * i + mMainRect.top, mWidth, rowSpace * i + mMainRect.top, mGridPaint);
-            } else {//只画 首，尾 分割线
-                if (i == mGridRows) {
-                    canvas.drawLine(mLeftTitleMargin, rowSpace * i + mMainRect.top, mWidth, rowSpace * i + mMainRect.top, mGridPaint);
-                }
-            }
+        int rowSpace;
+        if (isDrawDown) {
+            rowSpace = (mHeight - mBottomPadding) / 11;
+        } else {
+            rowSpace = (mHeight - mBottomPadding) / 9;
         }
-        //-----------------------下方子图------------------------
-        canvas.drawLine(mLeftTitleMargin, mChildRect.top, mWidth, mChildRect.top, mGridPaint);
-        canvas.drawLine(mLeftTitleMargin, mChildRect.bottom, mWidth, mChildRect.bottom, mGridPaint);
+        canvas.drawLine(0, 0, mWidth, 0, mGridPaint);
+        for (int i = 0; i < 5; i++) {
+            canvas.drawLine(0, rowSpace + rowSpace * i * 2, mWidth, rowSpace + rowSpace * i * 2, mGridPaint);
+        }
+        if (isDrawDown) {
+            canvas.drawLine(0, mHeight - mBottomPadding, mWidth, mHeight - mBottomPadding, mGridPaint);
+        }
 
         //纵向的grid
-        float columnSpace = (mWidth - mLeftTitleMargin) / mGridColumns;
+        float columnSpace = mWidth / mGridColumns;
         for (int i = 0; i <= mGridColumns; i++) {
-            if (mDrawGirdLine) {
-                canvas.drawLine(columnSpace * i + mLeftTitleMargin, mChildRect.top, columnSpace * i + mLeftTitleMargin, mChildRect.bottom, mGridPaint);
-                canvas.drawLine(columnSpace * i + mLeftTitleMargin, mMainRect.top, columnSpace * i + mLeftTitleMargin, mMainRect.bottom, mGridPaint);
-            } else {//只画 首，尾 分割线
-                if (i == 0) {
-                    canvas.drawLine(columnSpace * i + mLeftTitleMargin, mChildRect.top, columnSpace * i + mLeftTitleMargin, mChildRect.bottom, mGridPaint);
-                    canvas.drawLine(columnSpace * i + mLeftTitleMargin, mMainRect.top, columnSpace * i + mLeftTitleMargin, mMainRect.bottom, mGridPaint);
-                }
-            }
+            canvas.drawLine(columnSpace * i, 0, columnSpace * i, mHeight - mBottomPadding, mGridPaint);
         }
     }
 
@@ -423,14 +595,13 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         //保存之前的平移，缩放
         canvas.save();
         canvas.translate(mTranslateX * mScaleX, 0);
-
         canvas.scale(mScaleX, 1);
-        shaderPath = new Path();
-        if (!isDrawMinuteStyle()) {
-            if (mStopIndex < mAdapter.getCount() - 1) {
-                mStopIndex += 1;
-            }
-        }
+//        if (!isDrawMinuteStyle()) {
+//            if (mStopIndex < mAdapter.getCount() - 1) {
+//                mStopIndex += 1;
+//            }
+//        }
+        shaderPath.reset();
         for (int i = mStartIndex; i <= mStopIndex; i++) {
             Object currentPoint = getItem(i);
             float currentPointX = getX(i);
@@ -442,10 +613,18 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
                 shaderPath.lineTo(lastX, getMainY(((IKLine) lastPoint).getClosePrice()));
             } else {
                 shaderPath.lineTo(lastX, getMainY(((IKLine) lastPoint).getClosePrice()));
-
             }
+            //绘制主图
             if (mMainDraw != null) {
                 mMainDraw.drawTranslated(lastPoint, currentPoint, lastX, currentPointX, canvas, this, i);
+            }
+            //绘制成交量
+            if (mVolumeDraw != null && isDrawVolume) {
+                mVolumeDraw.drawTranslated(lastPoint, currentPoint, lastX, currentPointX, canvas, this, i);
+                if (i == mStopIndex) {
+                    int rightIndex = mStopIndex >= mAdapter.getCount() - 1 ? mAdapter.getCount() - 1 : mStopIndex + 1;
+                    mVolumeDraw.drawTranslated(currentPoint, getItem(rightIndex), currentPointX, getX(rightIndex), canvas, this, i);
+                }
             }
             if (mChildDraw != null && isDrawDown) {
                 mChildDraw.drawTranslated(lastPoint, currentPoint, lastX, currentPointX, canvas, this, i);
@@ -459,14 +638,15 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
 
         if (mMainDraw != null) {
             if (isDrawMinuteStyle()) {
+
                 Object lastPoint = getItem(mStopIndex);
                 float lastX = getX(mStopIndex);
                 SimpleCandle simpleCandle = new SimpleCandle();
                 simpleCandle.setClosePrice(drawBean.mMostRightClosePrice);
-                mMainDraw.drawTranslated(lastPoint, simpleCandle, lastX, drawBean.mMostRightX, canvas, this, mAdapter.getCount() - 1 > mStopIndex ? mAdapter.getCount() - 1 : mStopIndex);
-                shaderPath.lineTo(getX(mStopIndex), getMainY(((IKLine) getItem(mStopIndex)).getClosePrice()));
-                shaderPath.lineTo(drawBean.mMostRightX, drawBean.mMostRightY);
-                shaderPath.lineTo(drawBean.mMostRightX, mMainRect.height() + mMainRect.top);
+//                mMainDraw.drawTranslated(lastPoint, simpleCandle, getX(mStopIndex - 1), getX(mStopIndex), canvas, this, mAdapter.getCount() - 1 > mStopIndex ? mAdapter.getCount() - 1 : mStopIndex);
+                shaderPath.lineTo(getX(mStopIndex - 1), getMainY(((IKLine) getItem(mStopIndex - 1)).getClosePrice()));
+                shaderPath.lineTo(getX(mStopIndex), drawBean.mMostRightY);
+                shaderPath.lineTo(getX(mStopIndex), mMainRect.height() + mMainRect.top);
                 shaderPath.lineTo(getX(mStartIndex), mMainRect.height() + mMainRect.top);
                 shaderPath.close();
                 canvas.drawPath(shaderPath, mShaderPaint);
@@ -482,25 +662,45 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      * @param canvas
      */
     private void drawText(Canvas canvas) {
-        Paint.FontMetrics fm = mTextPaint.getFontMetrics();
-        float textHeight = fm.descent - fm.ascent;
-        float baseLine = (textHeight - fm.bottom - fm.top) / 2;
+
         //--------------画上方k线图的值-------------
         if (mMainDraw != null) {
-            canvas.drawText(formatValue(mMainMaxValue), mPadingValue, baseLine + mMainRect.top, mTextPaint);
-            canvas.drawText(formatValue(mMainMinValue), mPadingValue, mMainRect.bottom - textHeight + baseLine, mTextPaint);
+            String maxValue = formatValue(mMainMaxValue);
+            String minValue = formatValue(mMainMinValue);
+            float rowValue = (mMainMaxValue - mMainMinValue) / 3;
+            if (labelGravity == Gravity.LEFT) {
+                canvas.drawText(maxValue, mPadingValue, mMainRect.top - textHeight + baseLine, mTextPaint);
+                canvas.drawText(minValue, mPadingValue, mMainRect.bottom - textHeight + baseLine, mTextPaint);
+            } else {
+                float maxTextWidth = mTextPaint.measureText(maxValue);
+                float minTextWidth = mTextPaint.measureText(minValue);
+                canvas.drawText(maxValue, mWidth - upDownWidth - maxTextWidth, mMainRect.top - textHeight + baseLine, mTextPaint);
+                canvas.drawText(minValue, mWidth - upDownWidth - minTextWidth, mMainRect.bottom - textHeight + baseLine, mTextPaint);
+            }
+            for (int i = 2; i > 0; i--) {
+                String text = formatValue(rowValue * i + mMainMinValue);
+                float textWidth = mTextPaint.measureText(text);
+                if (labelGravity == Gravity.LEFT) {
+                    canvas.drawText(text, mPadingValue, mMainRect.bottom - mMainRect.height() / 3 * i - textHeight + baseLine, mTextPaint);
+                } else {
+                    canvas.drawText(text, mWidth - upDownWidth - textWidth, mMainRect.bottom - mMainRect.height() / 3 * i - textHeight + baseLine, mTextPaint);
+                }
 
-            float rowValue = (mMainMaxValue - mMainMinValue) / mGridRows;
-            float rowSpace = mMainRect.height() / mGridRows;
-            for (int i = 1; i < mGridRows; i++) {
-                String text = formatValue(rowValue * (mGridRows - i) + mMainMinValue);
-                canvas.drawText(text, mPadingValue, fixTextY(rowSpace * i + mMainRect.top), mTextPaint);
             }
         }
         //--------------画下方子图的值-------------
         if (mChildDraw != null && isDrawDown) {
-            canvas.drawText(mChildDraw.getValueFormatter().format(mChildMaxValue), mPadingValue, mChildRect.top + baseLine, mTextPaint);
-            canvas.drawText(mChildDraw.getValueFormatter().format(mChildMinValue), mPadingValue, mChildRect.bottom, mTextPaint);
+            String maxValue = mChildDraw.getValueFormatter().format(mChildMaxValue);
+            String minValue = mChildDraw.getValueFormatter().format(mChildMinValue);
+            if (labelGravity == Gravity.LEFT) {
+                canvas.drawText(maxValue, mPadingValue, mChildRect.top + baseLine, mTextPaint);
+                canvas.drawText(minValue, mPadingValue, mChildRect.bottom, mTextPaint);
+            } else {
+                float maxTextWidth = mTextPaint.measureText(maxValue);
+                float minTextWidth = mTextPaint.measureText(minValue);
+                canvas.drawText(maxValue, mWidth - maxTextWidth, mChildRect.top + baseLine, mTextPaint);
+                canvas.drawText(minValue, mWidth - minTextWidth, mChildRect.bottom, mTextPaint);
+            }
         }
         //--------------画时间---------------300------
         float columnSpace = (mWidth - mLeftTitleMargin) / mGridColumns;
@@ -522,54 +722,76 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         if (translateX >= startX && translateX <= stopX) {
             canvas.drawText(formatDateTime(getAdapter().getDate(mStartIndex)), mLeftTitleMargin, y, mTextPaint);
         }
-        //绘制右边时间
-        translateX = xToTranslateX(mWidth - 6);
+        if (translateXtoX(getX(mStopIndex)) > mWidth - mPointWidth * 2) {
+            //绘制右边时间
+            translateX = xToTranslateX(mWidth - 6);
 //        if (translateX >= startX && translateX <= stopX) {
-        String rightTimetext = formatDateTime(getAdapter().getDate(mStopIndex));
-        canvas.drawText(rightTimetext, mWidth - mTextPaint.measureText(rightTimetext), y, mTextPaint);
+            String rightTimetext = formatDateTime(getAdapter().getDate(mStopIndex));
+            canvas.drawText(rightTimetext, mWidth - mTextPaint.measureText(rightTimetext), y, mTextPaint);
 //        }
-
-        if (!mDrawMinuteStyle) {
-            //绘制最右边的点及线
-            ICandle point = (ICandle) getItem(mStopIndex);
-
-            String closePrice = formatValue(point.getClosePrice());
-            float timeLineTextWidth = mTextPaint.measureText(closePrice);
-
-            float endX = translateXtoX(getX(mStopIndex));
-            float endY = getMainY(point.getClosePrice());
-            canvas.drawLine(0, endY, endX, endY, mWhitePaint);
-            //K线 绘制最右边的点
-            canvas.drawCircle(endX, endY, dp2px(2), mWhitePaintWhite);
-
-            //画呼吸灯
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.sunshine);
-            canvas.drawBitmap(bmp, endX - bmp.getWidth() / 2, endY - bmp.getHeight() / 2, mSunshinePaint);
-
-            canvas.drawRect(0, endY - textHeight, timeLineTextWidth, endY, mBackgroundPaint);
-            canvas.drawText(closePrice, 0, endY - textHeight + baseLine, mTextPaint);
-            //绘制最高最低点指示文本
-            drawIndicatorText(canvas, textHeight, baseLine);
-        } else {
-            float closePriceExact = getExactValue(mWidth - 6, new CalcuMode() {
-                @Override
-                public float getValue(IKLine value) {
-                    return value.getClosePrice();
-                }
-            });
-            float timeLineTextWidth = mTextPaint.measureText(NumberUtil.keepMax8(closePriceExact + ""));
-            canvas.drawLine(0, drawBean.mMostRightY, translateXtoX(drawBean.mMostRightX), drawBean.mMostRightY, mWhitePaint);
-
-            //分时  绘制最右边的点
-            canvas.drawCircle(translateXtoX(drawBean.mMostRightX), drawBean.mMostRightY, dp2px(2), mWhitePaintWhite);
-
-            //画呼吸灯
-            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.sunshine);
-            canvas.drawBitmap(bmp, translateXtoX(drawBean.mMostRightX - bmp.getWidth() / 2), drawBean.mMostRightY - bmp.getHeight() / 2, mSunshinePaint);
-
-            canvas.drawRect(0, drawBean.mMostRightY - textHeight, timeLineTextWidth, drawBean.mMostRightY, mBackgroundPaint);
-            canvas.drawText(formatValue(closePriceExact), 0, drawBean.mMostRightY - textHeight + baseLine, mTextPaint);
         }
+
+        drawLeftRightDot(canvas);
+
+//        if (!mDrawMinuteStyle) {
+//            //绘制最右边的点及线
+//            ICandle point = (ICandle) getItem(mStopIndex);
+//
+//            String closePrice = formatValue(point.getClosePrice());
+//            float timeLineTextWidth = mTextPaint.measureText(closePrice);
+//
+//            float endX = translateXtoX(getX(mStopIndex));
+//            float endY = getMainY(point.getClosePrice());
+//            canvas.drawLine(0, endY, endX, endY, mWhitePaint);
+//            //K线 绘制最右边的点
+//            canvas.drawCircle(endX, endY, dp2px(2), mWhitePaintWhite);
+//
+//            //画呼吸灯
+//            Bitmap bmp = BitmapFactory.decodeResource(getResources(), lightDrawable);
+//            bmp = tintBitmap(bmp, breathColor);
+//            canvas.drawBitmap(bmp, endX - bmp.getWidth() / 2, endY - bmp.getHeight() / 2, mSunshinePaint);
+//
+//            canvas.drawRect(0, endY - textHeight, timeLineTextWidth, endY, mBackgroundPaint);
+//            canvas.drawText(closePrice, 0, endY - textHeight + baseLine, mTextPaint);
+//            if (!TextUtils.isEmpty(currentDownText) && mScrollX == 0) {
+//                canvas.drawText(currentDownText, currentDownTextPaddingLeft, endY - textHeight + baseLine + 30, mTextCurrentPaint);
+//            }
+//            if (!TextUtils.isEmpty(currentDownText2) && mScrollX == 0) {
+//                canvas.drawText(currentDownText2, currentDownTextPaddingLeft, endY - textHeight + baseLine + 80, mTextCurrentPaint);
+//            }
+//
+//            //绘制最高最低点指示文本
+//            drawIndicatorText(canvas, textHeight, baseLine);
+//        } else {
+//            float closePriceExact = getExactValue(mWidth - 6, new CalcuMode() {
+//                @Override
+//                public float getValue(IKLine value) {
+//                    return value.getClosePrice();
+//                }
+//            });
+//
+//            float timeLineTextWidth = mTextPaint.measureText(formatValue(closePriceExact));
+//            canvas.drawLine(0, drawBean.mMostRightY, translateXtoX(drawBean.mMostRightX), drawBean.mMostRightY, mWhitePaint);
+//
+//            //分时  绘制最右边的点
+//            canvas.drawCircle(translateXtoX(drawBean.mMostRightX), drawBean.mMostRightY, dp2px(2), mWhitePaintWhite);
+//
+//            //画呼吸灯
+//            Bitmap bmp = BitmapFactory.decodeResource(getResources(), lightDrawable);
+//            bmp = tintBitmap(bmp, breathColor);
+//            canvas.drawBitmap(bmp, translateXtoX(drawBean.mMostRightX - bmp.getWidth() / 2), drawBean.mMostRightY - bmp.getHeight() / 2, mSunshinePaint);
+//
+//            canvas.drawRect(0, drawBean.mMostRightY - textHeight, timeLineTextWidth, drawBean.mMostRightY, mBackgroundPaint);
+//            canvas.drawText(formatValue(closePriceExact), 0, drawBean.mMostRightY - textHeight + baseLine, mTextPaint);
+//            if (!TextUtils.isEmpty(currentDownText) && mScrollX == 0) {
+//                canvas.drawText(currentDownText, currentDownTextPaddingLeft, drawBean.mMostRightY - textHeight + baseLine + 30, mTextCurrentPaint);
+//            }
+//            if (!TextUtils.isEmpty(currentDownText2) && mScrollX == 0) {
+//                canvas.drawText(currentDownText2, currentDownTextPaddingLeft, drawBean.mMostRightY - textHeight + baseLine + 80, mTextCurrentPaint);
+//            }
+//
+//
+//        }
 
         if (isLongPress) {
             IKLine point = (IKLine) getItem(mSelectedIndex);
@@ -612,11 +834,92 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
     }
 
     /**
+     * 绘制呼吸灯及当前价格指示线
+     *
+     * @param canvas
+     */
+    private void drawLeftRightDot(Canvas canvas) {
+        //绘制最右边的点及线
+        ICandle point = (ICandle) getItem(mStopIndex);
+
+        String closePrice = formatValue(point.getClosePrice());
+        float timeLineTextWidth = mCurrentPricePaint.measureText(closePrice);
+        Rect bounds = new Rect();
+        mTextCurrentPaint.getTextBounds(closePrice, 0, 1, bounds);
+        Rect boundsText = new Rect();
+        mCurrentPricePaint.getTextBounds(closePrice, 0, 1, boundsText);
+
+
+        float endX = translateXtoX(getX(mStopIndex));
+        float endY = getMainY(point.getClosePrice());
+        //画呼吸灯
+        Bitmap bmp = BitmapFactory.decodeResource(getResources(), lightDrawable);
+        bmp = tintBitmap(bmp, breathColor);
+        canvas.drawBitmap(bmp, endX - bmp.getWidth() / 2, endY - bmp.getHeight() / 2, mSunshinePaint);
+        canvas.drawCircle(endX, endY, dp2px(2), mWhitePaintWhite);
+
+
+        if (labelGravity == Gravity.LEFT) {
+
+            canvas.drawLine(0, endY, endX, endY, mCurrentLinePaint);
+            canvas.drawRect(0, endY - textHeight, timeLineTextWidth, endY, mBackgroundPaint);
+            canvas.drawText(closePrice, 0, endY - textHeight + baseLine, mCurrentPricePaint);
+            if (!TextUtils.isEmpty(currentDownText) && mScrollX == 0) {
+                canvas.drawText(currentDownText, currentDownTextPaddingLeft, endY - textHeight + baseLine + boundsText.height() + upDownPadding, mTextCurrentPaint);
+            }
+            if (!TextUtils.isEmpty(currentDownText2) && mScrollX == 0) {
+                canvas.drawText(currentDownText2, currentDownTextPaddingLeft, endY - textHeight + baseLine + boundsText.height() + bounds.height() + upDownPadding * 2, mTextCurrentPaint);
+            }
+
+            //绘制最高最低点指示文本
+        } else {
+            if (mScrollX == 0) {
+                mCurrentLinePath.reset();
+                mCurrentLinePath.moveTo(endX, endY);
+                mCurrentLinePath.lineTo(mWidth - timeLineTextWidth - upDownWidth, endY);
+                canvas.drawPath(mCurrentLinePath, mCurrentLinePaint);
+//                canvas.drawLine(endX, endY, mWidth - timeLineTextWidth, endY, mCurrentLinePaint);
+                canvas.drawRect(mWidth - timeLineTextWidth - upDownPadding, endY - textHeight, mWidth - upDownWidth, endY, mBackgroundPaint);
+                canvas.drawText(closePrice, mWidth - timeLineTextWidth - upDownWidth, endY - textHeight + baseLine, mCurrentPricePaint);
+                if (!TextUtils.isEmpty(currentDownText) && mScrollX == 0) {
+                    float widthCurrent = mTextCurrentPaint.measureText(currentDownText);
+                    canvas.drawText(currentDownText, mWidth - widthCurrent - upDownWidth, endY - textHeight + baseLine + boundsText.height() + upDownPadding, mTextCurrentPaint);
+                }
+                if (!TextUtils.isEmpty(currentDownText2) && mScrollX == 0) {
+                    float widthCurrent = mTextCurrentPaint.measureText(currentDownText2);
+
+                    canvas.drawText(currentDownText2, mWidth - widthCurrent - upDownWidth, endY - textHeight + baseLine + boundsText.height() + bounds.height() + upDownPadding * 2, mTextCurrentPaint);
+                }
+            }
+        }
+        if (!isDrawMinuteStyle()) {
+            drawIndicatorText(canvas, textHeight, baseLine);
+        }
+
+    }
+
+    public static Bitmap tintBitmap(Bitmap inBitmap, int tintColor) {
+        if (inBitmap == null) {
+            return null;
+        }
+        Bitmap outBitmap = Bitmap.createBitmap(inBitmap.getWidth(), inBitmap.getHeight(), inBitmap.getConfig());
+        Canvas canvas = new Canvas(outBitmap);
+        Paint paint = new Paint();
+        paint.setColorFilter(new PorterDuffColorFilter(tintColor, PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(inBitmap, 0, 0, paint);
+        return outBitmap;
+    }
+
+    /**
      * 画分时K线右边呼吸灯
      *
      * @param mSunshinePaint
      */
     private void updateMinuteRightCircle(final Paint mSunshinePaint) {
+        if (disposableObserver != null && !disposableObserver.isDisposed()) {
+            disposableObserver.dispose();
+            disposableObserver = null;
+        }
         disposableObserver = new DisposableObserver<Long>() {
             @Override
             public void onNext(Long aLong) {
@@ -704,11 +1007,16 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         float baseLine = (textHeight - fm.bottom - fm.top) / 2;
         if (position >= 0 && position < mItemCount) {
             if (mMainDraw != null) {
-                float y = mMainRect.top + baseLine - textHeight;
+                float y = mMainRect.top - mMainRect.height() / 7 + baseLine;
                 float x = mLeftTitleMargin;
                 mMainDraw.drawText(canvas, this, position, x, y);
             }
-            if (mChildDraw != null) { //底部 ma5、ma10、ma20 文本位置
+            if (mVolumeDraw != null && isDrawVolume) {
+                float y = mVolumeRect.top + baseLine;
+                float x = mLeftTitleMargin;
+                mVolumeDraw.drawText(canvas, this, position, x, y);
+            }
+            if (mChildDraw != null && isDrawDown) { //底部 ma5、ma10、ma20 文本位置
                 float y = mChildRect.top + baseLine;
                 float x = mLeftTitleMargin == 0 ? mTextPaint.measureText(mChildDraw.getValueFormatter().format(mChildMaxValue) + "    ") : mLeftTitleMargin;
                 mChildDraw.drawText(canvas, this, position, x, y);
@@ -750,36 +1058,6 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         invalidate();
     }
 
-    //    public void notifyItemInsert() {
-//        if (mAdapter.getCount() != 0) {
-//            mDataLen = (mItemCount - 1) * mPointWidth;
-//            if (mDrawMinuteStyle && isFullScreen()) {
-//                float endScrollX = mScrollX + 6;
-//                float startScrollX = mScrollX + (mItemCount - mLastItemCount) * mPointWidth;
-//                if (startScrollX != endScrollX) {
-//                    ValueAnimator valueAnimator = ValueAnimator.ofFloat(startScrollX, endScrollX)
-//                            .setDuration(1000);
-//                    valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                        @Override
-//                        public void onAnimationUpdate(ValueAnimator animation) {
-//                            mScrollX = ((Float) animation.getAnimatedValue()).intValue();
-////                            checkAndFixScrollX();
-//                            setTranslateXFromScrollX(mScrollX);
-//                            invalidate();
-//                        }
-//                    });
-//                    valueAnimator.start();
-//                }
-//            } else {
-//                checkAndFixScrollX();
-//                setTranslateXFromScrollX(mScrollX);
-//                invalidate();
-//            }
-//        } else {
-//            setScrollX(0);
-//            invalidate();
-//        }
-//    }
     public void notifyItemInsert() {
         if (mAdapter.getCount() != 0) {
             mDataLen = (mItemCount - 1) * mPointWidth;
@@ -945,9 +1223,9 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         super.onScaleChanged(scale, oldScale);
     }
 
-    public void setTabBackGroundColor(int color) {
-        mKChartTabView.setTabBackgroundColor(color);
-    }
+//    public void setTabBackGroundColor(int color) {
+//        mKChartTabView.setTabBackgroundColor(color);
+//    }
 
     /**
      * 计算当前的显示区域
@@ -958,7 +1236,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         }
         mStartIndex = indexOfTranslateX(xToTranslateX(mLeftTitleMargin + (2 * mPadingValue))); //TODO 这里修改蜡烛图起始位置(加上pading,解决绘制越界问题)
         mStartIndex = mStartIndex <= 0 ? 0 : (mStartIndex - 1);
-        mStopIndex = (int) (xToTranslateX(mWidth - 6) / mPointWidth);//TODO 这里修改蜡烛图结束位置
+        mStopIndex = (int) (xToTranslateX((mWidth)) / mPointWidth);//TODO 这里修改蜡烛图结束位置
         if (mStopIndex > mAdapter.getCount() - 1) {
             mStopIndex = mAdapter.getCount() - 1;
         }
@@ -985,28 +1263,30 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         float[] floats = calculateMaxAndMin(mMainMaxValue, mMainMinValue);
         mMainMinValue = floats[0];
         mMainMaxValue = floats[1];
+        calculateMaxAndMinVolume();
         calculateMaxAndMinDown();//计算下面绘制的最大值与最小值
 
         mMainScaleY = mMainRect.height() * 1f / (mMainMaxValue - mMainMinValue);
         mChildScaleY = mChildRect.height() * 1f / (mChildMaxValue - mChildMinValue);
+        mVolumeScaleY = mVolumeRect.height() * 1f / (mVolumeMaxValue - mVolumeMinValue);
         drawBean.centerX = xToTranslateX(mWidth / 2);
-        drawBean.mMostRightY = getExactValue(mWidth - 6, new CalcuMode() {
+        drawBean.mMostRightY = getExactValue(mWidth, new CalcuMode() {
             @Override
             public float getValue(IKLine value) {
                 return getMainY(value.getClosePrice());
             }
         });
-        drawBean.mMostRightClosePrice = getExactValue(mWidth - 6, new CalcuMode() {
+        drawBean.mMostRightClosePrice = getExactValue(mWidth, new CalcuMode() {
             @Override
             public float getValue(IKLine value) {
                 return value.getClosePrice();
             }
         });
-        if (isFullScreen()) {
-            drawBean.mMostRightX = xToTranslateX(mWidth - 6);
-        } else {
-            drawBean.mMostRightX = getX(mStopIndex);
-        }
+//        if (isFullScreen()) {
+//            drawBean.mMostRightX = xToTranslateX(mWidth - 6);
+//        } else {
+        drawBean.mMostRightX = getX(mStopIndex);
+//        }
     }
 
     private void animateMaxAndMinUp() {
@@ -1073,6 +1353,8 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
             mChildMinValue = Float.MAX_VALUE;
             for (int i = mStartIndex; i <= ((mStopIndex >= mAdapter.getCount() - 1) ? mStopIndex : mStopIndex + 1); i++) {
                 IKLine point = (IKLine) getItem(i);
+                if (point == null)
+                    continue;
                 if (mChildDraw != null) {
                     mChildMaxValue = Math.max(mChildMaxValue, mChildDraw.getMaxValue(point));
                     mChildMinValue = Math.min(mChildMinValue, mChildDraw.getMinValue(point));
@@ -1087,6 +1369,33 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         }
         mLastChildMaxValue = mChildMaxValue;
         mLastChildMinValue = mChildMinValue;
+    }
+
+    /**
+     * 计算下部绘制区域，最大值与最小值
+     */
+    private void calculateMaxAndMinVolume() {
+        if (mLastStartIndex != mStartIndex || mLastStopIndex != mStopIndex || (mStartIndex == mStopIndex && mStopIndex == 0)) {//当起始与结束位置不一样时，重新构建绘制时用的数据
+            mVolumeMaxValue = 0;
+            mVolumeMinValue = Float.MAX_VALUE;
+            for (int i = mStartIndex; i <= ((mStopIndex >= mAdapter.getCount() - 1) ? mStopIndex : mStopIndex + 1); i++) {
+                IKLine point = (IKLine) getItem(i);
+                if (point == null)
+                    continue;
+                if (mVolumeDraw != null) {
+                    mVolumeMaxValue = Math.max(mVolumeMaxValue, mVolumeDraw.getMaxValue(point));
+                    mVolumeMinValue = Math.min(mVolumeMinValue, mVolumeDraw.getMinValue(point));
+                }
+            }
+            float[] floats = calculateMaxAndMin(mVolumeMaxValue, mVolumeMinValue);
+            mVolumeMinValue = floats[0];
+            mVolumeMaxValue = floats[1];
+        } else {
+            mVolumeMaxValue = mLastVolumeMaxValue;
+            mVolumeMinValue = mLastVolumeMinValue;
+        }
+        mLastVolumeMaxValue = mVolumeMaxValue;
+        mLastVolumeMinValue = mVolumeMinValue;
     }
 
     /**
@@ -1133,7 +1442,8 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         float startX = xToTranslateX(mLeftTitleMargin + (2 * mPadingValue));
         int mStartCalcuIndex = (int) (startX / mPointWidth);
         float endX = xToTranslateX(mWidth);
-        int mEndCalcuIndex = (int) (endX / mPointWidth);
+        //解决最小值不能取到当前值的问题
+        int mEndCalcuIndex = (int) (endX / mPointWidth) + 1;
         float mMainMaxHighValue = Float.MIN_VALUE;
         float mMainMinLowValue = Float.MAX_VALUE;
         if (mStartCalcuIndex < 0) {
@@ -1145,6 +1455,8 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
         if (mStartCalcuIndex != drawBean.mLastStartCalcuIndex || mEndCalcuIndex != drawBean.mLastEndCalcuIndex) {
             for (int i = mStartCalcuIndex; i <= mEndCalcuIndex; i++) {
                 IKLine point = (IKLine) getItem(i);
+                if (point == null)
+                    continue;
                 if (mMainDraw != null) {
                     mChangeMainMaxValue = Math.max(mChangeMainMaxValue, mMainDraw.getMaxValue(point));
                     mMainMaxHighValue = Math.max(mMainMaxHighValue, point.getHighPrice());
@@ -1235,7 +1547,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      * @return
      */
     private float getMinTranslateX() {
-        return -mDataLen + mWidth / mScaleX - mPointWidth / 2;
+        return -mDataLen + (mWidth - drawMarginWith) / mScaleX;
     }
 
     /**
@@ -1277,6 +1589,10 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
 
     }
 
+    public void setMinuteLineWidth(int width) {
+        ((MainDraw) mMainDraw).setMinuteLineWidth(width);
+    }
+
     /**
      * 在子区域画线
      *
@@ -1287,6 +1603,18 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      */
     public void drawChildLine(Canvas canvas, Paint paint, float startX, float startValue, float stopX, float stopValue) {
         canvas.drawLine(startX, getChildY(startValue), stopX, getChildY(stopValue), paint);
+    }
+
+    /**
+     * 在子区域画线
+     *
+     * @param startX     开始点的横坐标
+     * @param startValue 开始点的值
+     * @param stopX      结束点的横坐标
+     * @param stopValue  结束点的值
+     */
+    public void drawVolumeLine(Canvas canvas, Paint paint, float startX, float startValue, float stopX, float stopValue) {
+        canvas.drawLine(startX, getVolumeY(startValue), stopX, getVolumeY(stopValue), paint);
     }
 
     /**
@@ -1327,7 +1655,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      *
      * @param position
      */
-    private void setChildDraw(int position) {
+    public void setChildDraw(int position) {
         this.mChildDraw = mChildDraws.get(position);
         mChildDrawPosition = position;
         invalidate();
@@ -1341,7 +1669,7 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      */
     public void addChildDraw(String name, IChartDraw childDraw) {
         mChildDraws.add(childDraw);
-        mKChartTabView.addTab(name);
+//        mKChartTabView.addTab(name);
     }
 
     /**
@@ -1421,6 +1749,15 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
      */
     public void setMainDraw(IChartDraw mainDraw) {
         mMainDraw = mainDraw;
+    }
+
+    /**
+     * 设置2区域的 IChartDraw
+     *
+     * @param iChartDraw IChartDraw
+     */
+    public void setVolumeDraw(IChartDraw iChartDraw) {
+        mVolumeDraw = iChartDraw;
     }
 
     /**
@@ -1537,6 +1874,10 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
 
     public Rect getChildRect() {
         return mChildRect;
+    }
+
+    public Rect getVolumeRect() {
+        return mVolumeRect;
     }
 
     /**
@@ -1761,4 +2102,14 @@ public abstract class BaseKChartView extends ScrollAndScaleView {
             }
         }
     }
+
+    public void setLabelGravity(Gravity gravity) {
+        this.labelGravity = gravity;
+    }
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        getParent().requestDisallowInterceptTouchEvent(true);
+//        return super.dispatchTouchEvent(ev);
+//    }
 }

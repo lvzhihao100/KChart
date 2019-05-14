@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.github.tifezh.kchartlib.R;
+import com.github.tifezh.kchartlib.chart.base.IChartDraw;
 import com.github.tifezh.kchartlib.chart.base.OnSlideListener;
 import com.github.tifezh.kchartlib.chart.draw.BOLLDraw;
 import com.github.tifezh.kchartlib.chart.draw.KDJDraw;
@@ -71,12 +72,35 @@ public class KChartView extends BaseKChartView {
         mBOLLDraw = new BOLLDraw(this);
         mWRDraw = new WRDraw(this);
         mMainDraw = new MainDraw(this);
-        addChildDraw("VOL", mVolumeDraw);
         addChildDraw("MACD", mMACDDraw);
         addChildDraw("KDJ", mKDJDraw);
         addChildDraw("RSI", mRSIDraw);
         addChildDraw("WR", mWRDraw);
         setMainDraw(mMainDraw);
+        setVolumeDraw(mVolumeDraw);
+        setChildDraw(0);
+
+    }
+
+    public void setBreathColor(int color) {
+        this.breathColor = color;
+        mWhitePaint.setColor(color);
+    }
+
+    public void changeMACD() {
+        setChildDraw(0);
+    }
+
+    public void changeKDJ() {
+        setChildDraw(1);
+    }
+
+    public void changeRSI() {
+        setChildDraw(2);
+    }
+
+    public void changeWR() {
+        setChildDraw(3);
     }
 
     public void setMainDrawMaShow() {
@@ -139,14 +163,14 @@ public class KChartView extends BaseKChartView {
                 setSelectorTextSize(array.getDimension(R.styleable.KChartView_kc_selector_text_size, getDimension(R.dimen.chart_selector_text_size)));
                 setCandleSolid(array.getBoolean(R.styleable.KChartView_kc_candle_solid, true));
                 //tab
-                mKChartTabView.setIndicatorColor(array.getColor(R.styleable.KChartView_kc_tab_indicator_color, getColor(R.color.chart_tab_indicator)));
-                mKChartTabView.setBackgroundColor(array.getColor(R.styleable.KChartView_kc_tab_background_color, getColor(R.color.chart_tab_background)));
-                ColorStateList colorStateList = array.getColorStateList(R.styleable.KChartView_kc_tab_text_color);
-                if (colorStateList == null) {
-                    mKChartTabView.setTextColor(ContextCompat.getColorStateList(getContext(), R.color.tab_text_color_selector));
-                } else {
-                    mKChartTabView.setTextColor(colorStateList);
-                }
+//                mKChartTabView.setIndicatorColor(array.getColor(R.styleable.KChartView_kc_tab_indicator_color, getColor(R.color.chart_tab_indicator)));
+//                mKChartTabView.setBackgroundColor(array.getColor(R.styleable.KChartView_kc_tab_background_color, getColor(R.color.chart_tab_background)));
+//                ColorStateList colorStateList = array.getColorStateList(R.styleable.KChartView_kc_tab_text_color);
+//                if (colorStateList == null) {
+//                    mKChartTabView.setTextColor(ContextCompat.getColorStateList(getContext(), R.color.tab_text_color_selector));
+//                } else {
+//                    mKChartTabView.setTextColor(colorStateList);
+//                }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -388,6 +412,7 @@ public class KChartView extends BaseKChartView {
 
     /**
      * 设置分时线颜色
+     *
      * @param color
      */
     public void setMinuteLineColor(int color) {

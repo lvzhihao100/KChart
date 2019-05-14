@@ -74,14 +74,17 @@ public class MainDraw implements IChartDraw<ICandle> {
         mSelectorBackgroundStrokePaint.setStyle(Paint.Style.STROKE);
         mSelectorBackgroundStrokePaint.setStrokeWidth(view.dp2px(1));
     }
-    public void setShowMa(){
-        type=1;
+
+    public void setShowMa() {
+        type = 1;
     }
-    public void setShowBoll(){
-        type=2;
+
+    public void setShowBoll() {
+        type = 2;
     }
-    public void setShowNone(){
-        type=0;
+
+    public void setShowNone() {
+        type = 0;
     }
 
     public void setUpColor(@ColorRes int color) {
@@ -91,9 +94,13 @@ public class MainDraw implements IChartDraw<ICandle> {
     public void setDownColor(@ColorRes int color) {
         mGreenPaint.setColor(ContextCompat.getColor(context, color));
     }
-    public void setMinuteLineColor( int color){
-        mLinePaint.setColor(color);
 
+    public void setMinuteLineColor(int color) {
+        mLinePaint.setColor(color);
+    }
+
+    public void setMinuteLineWidth(int width) {
+        mLinePaint.setStrokeWidth(width);
     }
 
     @Override
@@ -409,6 +416,7 @@ public class MainDraw implements IChartDraw<ICandle> {
     public void setMaSpacePadding(int spacePadding) {
         this.spacePadding = spacePadding;
     }
+
     /**
      * 设置up颜色
      */
@@ -418,6 +426,7 @@ public class MainDraw implements IChartDraw<ICandle> {
 
     /**
      * 设置mb颜色
+     *
      * @param color
      */
     public void setBollMbColor(int color) {

@@ -5,21 +5,25 @@ package com.github.tifezh.kchartlib.chart.entity;
  * @see <a href="https://baike.baidu.com/item/KDJ%E6%8C%87%E6%A0%87/6328421?fr=aladdin&fromid=3423560&fromtitle=kdj"/>相关说明</a>
  * Created by tifezh on 2016/6/10.
  */
-public interface IKDJ {
+public interface IKDJ extends ILine{
 
     /**
      * K值
      */
     float getK();
+    void setK(float k);
 
     /**
      * D值
      */
     float getD();
+    void setD(float d);
 
     /**
      * J值
      */
     float getJ();
+    void setJ(float j);
+
 
 }

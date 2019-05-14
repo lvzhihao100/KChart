@@ -5,30 +5,20 @@ package com.github.tifezh.kchartlib.chart.entity;
  * Created by hjm on 2017/11/14 17:46.
  */
 
-public interface IVolume {
+public interface IVolume extends ILine{
 
-    /**
-     * 开盘价
-     */
-    float getOpenPrice();
 
-    /**
-     * 收盘价
-     */
-    float getClosePrice();
-
-    /**
-     * 成交量
-     */
-    float getVolume();
 
     /**
      * 五(月，日，时，分，5分等)均量
      */
     float getMA5Volume();
+    void setMA5Volume(float ma5Volume);
 
     /**
      * 十(月，日，时，分，5分等)均量
      */
     float getMA10Volume();
+    void setMA10Volume(float ma10Volume);
+
 }

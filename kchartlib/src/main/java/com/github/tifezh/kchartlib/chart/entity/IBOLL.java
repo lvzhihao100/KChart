@@ -6,20 +6,46 @@ package com.github.tifezh.kchartlib.chart.entity;
  * Created by tifezh on 2016/6/10.
  */
 
-public interface IBOLL {
+public interface IBOLL extends ILine{
 
     /**
      * 上轨线
      */
     float getUp();
+    void setUp(float up);
 
     /**
      * 中轨线
      */
     float getMb();
+    void setMb(float mb);
+
 
     /**
      * 下轨线
      */
     float getDn();
+    void setDn(float dn);
+
+    /**
+     * 五(月，日，时，分，5分等)均价
+     */
+    float getMA5Price();
+
+    void setMA5Price(float ma5Price);
+
+    /**
+     * 十(月，日，时，分，5分等)均价
+     */
+    float getMA10Price();
+
+    void setMA10Price(float ma10Price);
+
+    /**
+     * 二十(月，日，时，分，5分等)均价
+     */
+    float getMA20Price();
+
+    void setMA20Price(float ma20Price);
+
 }

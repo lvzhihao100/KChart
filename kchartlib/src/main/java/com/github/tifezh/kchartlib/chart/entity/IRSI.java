@@ -6,7 +6,7 @@ package com.github.tifezh.kchartlib.chart.entity;
  * Created by tifezh on 2016/6/10.
  */
 
-public interface IRSI {
+public interface IRSI extends ILine{
 
     /**
      * RSI1值
@@ -20,4 +20,8 @@ public interface IRSI {
      * RSI3值
      */
     float getRsi3();
+
+    void setRsi1(float rsi1);
+    void setRsi2(float rsi2);
+    void setRsi3(float rsi3);
 }

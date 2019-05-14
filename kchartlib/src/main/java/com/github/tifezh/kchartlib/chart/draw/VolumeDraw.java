@@ -54,8 +54,8 @@ public class VolumeDraw implements IChartDraw<IVolume> {
 
         drawHistogram(canvas, curPoint, lastPoint, curX, view, position);
         if (!isMaGone) {
-            view.drawChildLine(canvas, ma5Paint, lastX, lastPoint.getMA5Volume(), curX, curPoint.getMA5Volume());
-            view.drawChildLine(canvas, ma10Paint, lastX, lastPoint.getMA10Volume(), curX, curPoint.getMA10Volume());
+            view.drawVolumeLine(canvas, ma5Paint, lastX, lastPoint.getMA5Volume(), curX, curPoint.getMA5Volume());
+            view.drawVolumeLine(canvas, ma10Paint, lastX, lastPoint.getMA10Volume(), curX, curPoint.getMA10Volume());
         }
     }
 
@@ -64,8 +64,8 @@ public class VolumeDraw implements IChartDraw<IVolume> {
             BaseKChartView view, int position) {
 
         float r = pillarWidth / 2;
-        float top = view.getChildY(curPoint.getVolume());
-        int bottom = view.getChildRect().bottom;
+        float top = view.getVolumeY(curPoint.getVolume());
+        int bottom = view.getVolumeRect().bottom;
         if (curPoint.getClosePrice() >= curPoint.getOpenPrice()) {//涨
             canvas.drawRect(curX - r, top, curX + r, bottom, mRedPaint);
         } else {

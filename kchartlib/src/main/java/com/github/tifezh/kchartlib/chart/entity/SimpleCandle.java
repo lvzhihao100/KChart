@@ -35,10 +35,20 @@ public class SimpleCandle implements ICandle {
         return closePrice;
     }
 
+    @Override
+    public float getVolume() {
+        return 0;
+    }
+
 
     @Override
     public float getMA5Price() {
         return 0;
+    }
+
+    @Override
+    public void setMA5Price(float ma5Price) {
+
     }
 
     @Override
@@ -47,8 +57,18 @@ public class SimpleCandle implements ICandle {
     }
 
     @Override
+    public void setMA10Price(float ma10Price) {
+
+    }
+
+    @Override
     public float getMA20Price() {
         return 0;
+    }
+
+    @Override
+    public void setMA20Price(float ma20Price) {
+
     }
 
     @Override
@@ -62,12 +82,27 @@ public class SimpleCandle implements ICandle {
     }
 
     @Override
+    public void setUp(float up) {
+
+    }
+
+    @Override
     public float getMb() {
         return 0;
     }
 
     @Override
+    public void setMb(float mb) {
+
+    }
+
+    @Override
     public float getDn() {
         return 0;
+    }
+
+    @Override
+    public void setDn(float dn) {
+
     }
 }
